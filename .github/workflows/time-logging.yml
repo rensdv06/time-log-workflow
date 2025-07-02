@@ -1,7 +1,12 @@
 name: Add time log
-on: projects_v2
+
+on:
+    webhook:
+        types:
+            - projects_v2_status_update
+
 jobs:
     add-time-log:
         runs-on: ubuntu-latest
         steps:
-            - run: echo "${{github.event.action}}"
+            - run: echo "${{github.event.projects_v2_status_update.status}}"
