@@ -1,11 +1,7 @@
 name: Add time log
-on:
-    issues:
-        types: labeled
+on: projects_v2
 jobs:
     add-time-log:
         runs-on: ubuntu-latest
         steps:
-            - run: echo "${{github.event_name}}"
-            - run: echo "${{github.event}}"
-            - run: echo "${{github.event.label}}"
+            - run: echo "${{github.event.action}}"
