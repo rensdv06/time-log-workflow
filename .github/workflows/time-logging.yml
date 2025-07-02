@@ -1,0 +1,10 @@
+name: Add time log
+on:
+    project_card:
+        types: edited
+jobs:
+    add-time-log:
+        runs-on: ubuntu-latest
+        steps:
+            - run: echo "${{github.event_name}}"
+            - run: echo "${{github.event}}"
