@@ -16,7 +16,7 @@ jobs:
             const nowString = now.toISOString().replace("T", " ").slice(0, -5);
 
             const newTimeLogEntry = `| ${nowString} |                     |          |`;
-            const newIssueBody = context.event.issue.body.replace(
+            const newIssueBody = context.issue.body.replace(
               /(?<=## Time log.+\|)\n(?!\|)/ms,
               "$&" + newTimeLogEntry + "\n"
             );
@@ -24,6 +24,6 @@ jobs:
             await github.rest.issues.update({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.event.issue.number,
+              issue_number: context.issue.number,
               body: newIssueBody
             });
