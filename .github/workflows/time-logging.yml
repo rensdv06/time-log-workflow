@@ -23,6 +23,6 @@ jobs:
             await github.rest.issues.update({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              github.event.issue.number,
+              issue_number: github.event.issue.number,
               body: newIssueBody
             });
