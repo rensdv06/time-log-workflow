@@ -12,6 +12,8 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            console.log(JSON.stringify(context.issue))
+
             const now = new Date();
             const nowString = now.toISOString().replace("T", " ").slice(0, -5);
 
