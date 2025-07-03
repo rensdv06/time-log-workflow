@@ -12,6 +12,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            Object.keys(github).map(console.log)
             const now = new Date();
             const nowString = now.toISOString().replace("T", " ").slice(0, -5);
 
