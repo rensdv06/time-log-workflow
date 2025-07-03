@@ -8,30 +8,21 @@ jobs:
   add-time-log-entry:
     runs-on: ubuntu-latest
     steps:
-      - name: Set issue number
-        id: set-issue-number
-        run: echo "issue-number=${{github.event.issue.number}}" >> $GITHUB_OUTPUT
-      - name: Set issue body
-        id: set-issue-body
-        run: echo "issue-body=${{github.event.issue.body}}" >> $GITHUB_OUTPUT
       - name: Add time log entry to issue body
         uses: actions/github-script@v7
         with:
           script: |
-            const issueNumber = ${{steps.set-issue-number.outputs.issue-number}};
-            const issueBody = ${{steps.set-issue-body.outputs.issue-body}};
-
             const now = new Date();
             const nowString = now.toISOString().replace("T", " ").slice(0, -5);
 
             const newTimeLogEntry = `| ${nowString} |                     |          |`;
-            const newIssueBody = issueBody.replace(
+            const newIssueBody = github.event.issue.body.replace(
               /(?<=## Time log.+\|)\n(?!\|)/ms,
               "$&" + newTimeLogEntry + "\n"
             );
             await github.rest.issues.update({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issueNumber,
+              github.event.issue.number,
               body: newIssueBody
             });
