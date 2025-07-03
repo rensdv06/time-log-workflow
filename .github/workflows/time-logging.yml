@@ -8,6 +8,11 @@ jobs:
     add-time-log:
         runs-on: ubuntu-latest
         steps:
-            - run: echo "${{github.event_name}}"
-            - run: echo "${{github.event.label.name}}"
-            - run: echo "${{github.event.issue.body}}"
+            - run: echo "${{github.event.issue.number}}"
+            - run: echo "${{github.event.issue.id}}"
+            - name: Set issue number
+              id: set-issue-number
+              run: echo "issue-number=${{github.event.issue.number}}" >> $GITHUB_OUTPUT
+            - name: Set issue body
+              id: set-issue-body
+              run: echo "issue-body=${{github.event.issue.body}}" >> $GITHUB_OUTPUT
