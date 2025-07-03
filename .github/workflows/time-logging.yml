@@ -13,6 +13,8 @@ jobs:
         with:
           script: |
             Object.keys(github).map(console.log)
+            const issueNumber = github.event.issue.number;
+
             const now = new Date();
             const nowString = now.toISOString().replace("T", " ").slice(0, -5);
 
@@ -21,9 +23,10 @@ jobs:
               /(?<=## Time log.+\|)\n(?!\|)/ms,
               "$&" + newTimeLogEntry + "\n"
             );
+
             await github.rest.issues.update({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: github.event.issue.number,
+              issue_number: issueNumber,
               body: newIssueBody
             });
