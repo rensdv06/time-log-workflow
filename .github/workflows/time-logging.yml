@@ -19,9 +19,9 @@ jobs:
             const now = new Date();
             const nowString = now.toLocaleString("sv-SE", {timeZone: "Europe/Amsterdam"}); // YYYY-MM-DD HH:MM:SS format
 
-            console.log(nowString);
-            console.log(now.toLocaleString("sv-SE"));
-            console.log(new Date());
+            const testDate = new Date("2025-07-05 16:08:20");
+            console.log(testDate);
+            console.log(testDate.toString());
 
             const newTimeLogEntry = `| ${nowString} |                     |          |`;
             const newIssueBody = context.payload.issue.body.replace(
