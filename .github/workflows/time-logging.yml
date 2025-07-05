@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   add-time-log-entry:
+    if: github.event.label.name == 'in progress'
     runs-on: ubuntu-latest
     steps:
       - name: Add time log entry to issue body
