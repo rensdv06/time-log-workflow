@@ -19,7 +19,8 @@ jobs:
             const now = new Date();
             const nowString = now.toLocaleString("sv-SE", {timeZone: "Europe/Amsterdam"}); // YYYY-MM-DD HH:MM:SS format
 
-            const testDate = new Date("2025-07-05 16:08:20");
+            const timeZoneOffset = new Date(now.toLocaleString("sv-SE", {timeZone: "Europe/Amsterdam"})) - now;
+            const testDate = new Date(new Date("2025-07-06 13:00:00") - timeZoneOffset);
             console.log(testDate);
             console.log(testDate.toString());
 
