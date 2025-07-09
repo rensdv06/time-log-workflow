@@ -40,6 +40,12 @@ function getStartOfTimeLogEntry(timeLogEntry) {
   return startMatches[0];
 }
 
+function dateStringToDate(dateString, nowString, now) {
+  const dateWithTimeZoneOffset = new Date(dateString);
+  const timeZoneOffset = new Date(nowString) - now;
+  return new Date(dateWithTimeZoneOffset - timeZoneOffset);
+}
+
 function joinLines(lines) {
   return lines.join("\n");
 }
@@ -71,9 +77,7 @@ function completeLastTimeLog(issueBodyLines, locale) {
   const end = now;
 
   const startString = getStartOfTimeLogEntry(lastEntry);
-  const startWithTimeZoneOffset = new Date(startString);
-  const timeZoneOffset = new Date(nowString) - now;
-  const start = new Date(startWithTimeZoneOffset - timeZoneOffset);
+  const start = dateStringToDate(startString, nowString, now);
 
   const duration = new Date(end - start);
   const durationString = duration.toLocaleTimeString(locale, {
