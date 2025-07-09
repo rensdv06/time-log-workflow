@@ -46,7 +46,8 @@ const nowString = now.toLocaleString(locale, { timeZone: "Europe/Amsterdam" });
 
 // --- Add time log ---
 
-function addTimeLog(issueBodyLines, nowString, lineIndexOfLastEntry) {
+function addTimeLog(issueBodyLines, nowString) {
+  const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
   const startString = nowString;
   const newEntry = `| ${startString} |                     |          |`;
   return issueBodyLines.toSpliced(lineIndexOfLastEntry + 1, 0, newEntry);
@@ -54,13 +55,8 @@ function addTimeLog(issueBodyLines, nowString, lineIndexOfLastEntry) {
 
 // --- Complete time log ---
 
-function completeLastTimeLog(
-  issueBodyLines,
-  lineIndexOfLastEntry,
-  nowString,
-  now,
-  locale
-) {
+function completeLastTimeLog(issueBodyLines, nowString, now, locale) {
+  const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
   const lastEntry = issueBodyLines[lineIndexOfLastEntry];
   const endString = nowString;
 
