@@ -27,6 +27,10 @@ function getLineIndexOfLastEntry(issueBodyLines) {
   });
 }
 
+function dateToLocaleString(date, locale) {
+  return date.toLocaleString(locale, { timeZone: "Europe/Amsterdam" });
+}
+
 function getStartOfTimeLogEntry(timeLogEntry) {
   const startPattern = /(?<=\| )[^\|]+(?= \|)/;
   const startMatches = timeLogEntry.match(startPattern);
@@ -42,22 +46,26 @@ function joinLines(lines) {
 
 const now = new Date();
 const locale = "sv-SE"; // YYYY-MM-DD HH:MM:SS format
-const nowString = now.toLocaleString(locale, { timeZone: "Europe/Amsterdam" });
 
 // --- Add time log ---
 
-function addTimeLog(issueBodyLines, nowString) {
+function addTimeLog(issueBodyLines, now, locale) {
   const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
+
+  const nowString = dateToLocaleString(now, locale);
   const startString = nowString;
   const newEntry = `| ${startString} |                     |          |`;
+
   return issueBodyLines.toSpliced(lineIndexOfLastEntry + 1, 0, newEntry);
 }
 
 // --- Complete time log ---
 
-function completeLastTimeLog(issueBodyLines, nowString, now, locale) {
+function completeLastTimeLog(issueBodyLines, now, locale) {
   const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
   const lastEntry = issueBodyLines[lineIndexOfLastEntry];
+
+  const nowString = dateToLocaleString(now, locale);
   const endString = nowString;
 
   const startString = getStartOfTimeLogEntry(lastEntry);
