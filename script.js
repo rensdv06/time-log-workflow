@@ -1,10 +1,48 @@
 // --- General ---
 
+function splitLines(string) {
+  return string.split("\n");
+}
+
+function getLineIsFromTable(line) {
+  return /\|.+\|/.test(line);
+}
+
+function getLineIndexOfLastEntry(issueBodyLines) {
+  let timeLogHeadingFound = false;
+  return issueBodyLines.findIndex((line, lineIndex) => {
+    if (!timeLogHeadingFound) {
+      if (line === "## Time log") {
+        timeLogHeadingFound = true;
+      }
+      return false;
+    }
+    const previousLine = issueBodyLines[lineIndex - 1];
+    const nextLine = issueBodyLines[lineIndex + 1];
+    return (
+      getLineIsFromTable(previousLine) &&
+      getLineIsFromTable(line) &&
+      nextLine === ""
+    );
+  });
+}
+
+function getStartOfTimeLogEntry(timeLogEntry) {
+  const startPattern = /(?<=\| )[^\|]+(?= \|)/;
+  const startMatches = timeLogEntry.match(startPattern);
+  if (startMatches === null) {
+    throw new Error("No start match found in time log entry: " + timeLogEntry);
+  }
+  return startMatches[0];
+}
+
+function joinLines(lines) {
+  return lines.join("\n");
+}
+
 const now = new Date();
 const locale = "sv-SE"; // YYYY-MM-DD HH:MM:SS format
 const nowString = now.toLocaleString(locale, { timeZone: "Europe/Amsterdam" });
-
-const latestEntryPattern = /(?<=## Time log\n[\s\S]*)(?<=\| ).+(?= \|\n(?!\|))/;
 
 // --- Add time log ---
 
@@ -26,17 +64,14 @@ await github.rest.issues.update({
 // --- Complete time log ---
 
 const issueBody = context.payload.issue.body;
+const issueBodyLines = splitLines(issueBody);
 
-const latestEntryMatches = issueBody.match(latestEntryPattern);
-if (latestEntryMatches === null) {
-  throw new Error("No latest entry match found in issue body:\n" + issueBody);
-}
+const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
+const lastEntry = issueBodyLines[lineIndexOfLastEntry];
 
-const latestEntry = latestEntryMatches[0];
-const ENTRY_VALUES_SEPARATOR = " | ";
-const latestEntryValues = latestEntry.split(ENTRY_VALUES_SEPARATOR);
-const startString = latestEntryValues[0];
+const endString = nowString;
 
+const startString = getStartOfTimeLogEntry(lastEntry);
 const startWithTimeZoneOffset = new Date(startString);
 const timeZoneOffset = new Date(nowString) - now;
 const start = new Date(startWithTimeZoneOffset - timeZoneOffset);
@@ -47,13 +82,12 @@ const durationString = duration.toLocaleTimeString(locale, {
   timeZone: "UTC",
 });
 
-const endString = nowString;
-const updatedLatestEntryValues = [startString, endString, durationString];
-const updatedLatestEntry = updatedLatestEntryValues.join(
-  ENTRY_VALUES_SEPARATOR
+const updatedValuesPattern = /(?<=\| .+ \| )[^\|]+(?= \|)/g;
+const updatedValues = [endString, durationString];
+let updatedValuesCounter = 0;
+issueBodyLines[lineIndexOfLastEntry] = lastEntry.replace(
+  updatedValuesPattern,
+  () => updatedValues[updatedValuesCounter++]
 );
 
-const updatedIssueBody = issueBody.replace(
-  latestEntryPattern,
-  updatedLatestEntry
-);
+const updatedIssueBody = joinLines(issueBodyLines);
