@@ -91,3 +91,10 @@ issueBodyLines[lineIndexOfLastEntry] = lastEntry.replace(
 );
 
 const updatedIssueBody = joinLines(issueBodyLines);
+
+await github.rest.issues.update({
+  owner: context.repo.owner,
+  repo: context.repo.repo,
+  issue_number: context.payload.issue.number,
+  body: updatedIssueBody,
+});
