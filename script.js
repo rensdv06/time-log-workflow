@@ -44,14 +44,14 @@ function joinLines(lines) {
   return lines.join("\n");
 }
 
-const now = new Date();
 const LOCALE = "sv-SE"; // YYYY-MM-DD HH:MM:SS format
 
 // --- Add time log ---
 
-function addTimeLog(issueBodyLines, now, locale) {
+function addTimeLog(issueBodyLines, locale) {
   const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
 
+  const now = new Date();
   const nowString = dateToLocaleString(now, locale);
   const startString = nowString;
   const newEntry = `| ${startString} |                     |          |`;
@@ -61,19 +61,20 @@ function addTimeLog(issueBodyLines, now, locale) {
 
 // --- Complete time log ---
 
-function completeLastTimeLog(issueBodyLines, now, locale) {
+function completeLastTimeLog(issueBodyLines, locale) {
   const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
   const lastEntry = issueBodyLines[lineIndexOfLastEntry];
 
+  const now = new Date();
   const nowString = dateToLocaleString(now, locale);
   const endString = nowString;
+  const end = now;
 
   const startString = getStartOfTimeLogEntry(lastEntry);
   const startWithTimeZoneOffset = new Date(startString);
   const timeZoneOffset = new Date(nowString) - now;
   const start = new Date(startWithTimeZoneOffset - timeZoneOffset);
 
-  const end = now;
   const duration = new Date(end - start);
   const durationString = duration.toLocaleTimeString(locale, {
     timeZone: "UTC",
