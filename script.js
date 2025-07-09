@@ -46,22 +46,11 @@ const nowString = now.toLocaleString(locale, { timeZone: "Europe/Amsterdam" });
 
 // --- Add time log ---
 
-const issueBody = context.payload.issue.body;
-const issueBodyLines = splitLines(issueBody);
-
-const startString = nowString;
-const newEntry = `| ${startString} |                     |          |`;
-
-const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
-issueBodyLines.splice(lineIndexOfLastEntry + 1, 0, newEntry);
-
-const updatedIssueBody = joinLines(issueBodyLines);
-await github.rest.issues.update({
-  owner: context.repo.owner,
-  repo: context.repo.repo,
-  issue_number: context.payload.issue.number,
-  body: updatedIssueBody,
-});
+function addTimeLog(issueBodyLines, nowString, lineIndexOfLastEntry) {
+  const startString = nowString;
+  const newEntry = `| ${startString} |                     |          |`;
+  return issueBodyLines.toSpliced(lineIndexOfLastEntry + 1, 0, newEntry);
+}
 
 // --- Complete time log ---
 
