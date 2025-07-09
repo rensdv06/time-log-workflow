@@ -46,6 +46,14 @@ function dateStringToDate(dateString, nowString, now) {
   return new Date(dateWithTimeZoneOffset - timeZoneOffset);
 }
 
+function stringReplaceWithMultipleValues(string, searchValue, replaceValues) {
+  let replacedValuesCounter = 0;
+  return string.replace(
+    searchValue,
+    () => replaceValues[replacedValuesCounter++]
+  );
+}
+
 function joinLines(lines) {
   return lines.join("\n");
 }
@@ -86,10 +94,10 @@ function completeLastTimeLog(issueBodyLines, locale) {
 
   const updatedValuesPattern = /(?<=\| .+ \| )[^\|]+(?= \|)/g;
   const updatedValues = [endString, durationString];
-  let updatedValuesCounter = 0;
-  issueBodyLines[lineIndexOfLastEntry] = lastEntry.replace(
+  issueBodyLines[lineIndexOfLastEntry] = stringReplaceWithMultipleValues(
+    lastEntry,
     updatedValuesPattern,
-    () => updatedValues[updatedValuesCounter++]
+    updatedValues
   );
 
   return issueBodyLines;
