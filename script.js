@@ -45,7 +45,7 @@ function joinLines(lines) {
 }
 
 const now = new Date();
-const locale = "sv-SE"; // YYYY-MM-DD HH:MM:SS format
+const LOCALE = "sv-SE"; // YYYY-MM-DD HH:MM:SS format
 
 // --- Add time log ---
 
