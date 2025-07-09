@@ -54,38 +54,34 @@ function addTimeLog(issueBodyLines, nowString, lineIndexOfLastEntry) {
 
 // --- Complete time log ---
 
-const issueBody = context.payload.issue.body;
-const issueBodyLines = splitLines(issueBody);
+function completeLastTimeLog(
+  issueBodyLines,
+  lineIndexOfLastEntry,
+  nowString,
+  now,
+  locale
+) {
+  const lastEntry = issueBodyLines[lineIndexOfLastEntry];
+  const endString = nowString;
 
-const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
-const lastEntry = issueBodyLines[lineIndexOfLastEntry];
+  const startString = getStartOfTimeLogEntry(lastEntry);
+  const startWithTimeZoneOffset = new Date(startString);
+  const timeZoneOffset = new Date(nowString) - now;
+  const start = new Date(startWithTimeZoneOffset - timeZoneOffset);
 
-const endString = nowString;
+  const end = now;
+  const duration = new Date(end - start);
+  const durationString = duration.toLocaleTimeString(locale, {
+    timeZone: "UTC",
+  });
 
-const startString = getStartOfTimeLogEntry(lastEntry);
-const startWithTimeZoneOffset = new Date(startString);
-const timeZoneOffset = new Date(nowString) - now;
-const start = new Date(startWithTimeZoneOffset - timeZoneOffset);
+  const updatedValuesPattern = /(?<=\| .+ \| )[^\|]+(?= \|)/g;
+  const updatedValues = [endString, durationString];
+  let updatedValuesCounter = 0;
+  issueBodyLines[lineIndexOfLastEntry] = lastEntry.replace(
+    updatedValuesPattern,
+    () => updatedValues[updatedValuesCounter++]
+  );
 
-const end = now;
-const duration = new Date(end - start);
-const durationString = duration.toLocaleTimeString(locale, {
-  timeZone: "UTC",
-});
-
-const updatedValuesPattern = /(?<=\| .+ \| )[^\|]+(?= \|)/g;
-const updatedValues = [endString, durationString];
-let updatedValuesCounter = 0;
-issueBodyLines[lineIndexOfLastEntry] = lastEntry.replace(
-  updatedValuesPattern,
-  () => updatedValues[updatedValuesCounter++]
-);
-
-const updatedIssueBody = joinLines(issueBodyLines);
-
-await github.rest.issues.update({
-  owner: context.repo.owner,
-  repo: context.repo.repo,
-  issue_number: context.payload.issue.number,
-  body: updatedIssueBody,
-});
+  return issueBodyLines;
+}
