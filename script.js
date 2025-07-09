@@ -46,14 +46,16 @@ const nowString = now.toLocaleString(locale, { timeZone: "Europe/Amsterdam" });
 
 // --- Add time log ---
 
+const issueBody = context.payload.issue.body;
+const issueBodyLines = splitLines(issueBody);
+
 const startString = nowString;
 const newEntry = `| ${startString} |                     |          |`;
-const lastTableCharacterPattern = /(?<=## Time log.+\|)\n(?!\|)/s;
-const updatedIssueBody = context.payload.issue.body.replace(
-  lastTableCharacterPattern,
-  (match) => match + newEntry + "\n"
-);
 
+const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
+issueBodyLines.splice(lineIndexOfLastEntry + 1, 0, newEntry);
+
+const updatedIssueBody = joinLines(issueBodyLines);
 await github.rest.issues.update({
   owner: context.repo.owner,
   repo: context.repo.repo,
