@@ -1,5 +1,3 @@
-// --- General ---
-
 function getLineIsFromTable(line) {
   return /\|.+\|/.test(line);
 }
@@ -52,8 +50,6 @@ function stringReplaceWithMultipleValues(string, searchValue, replaceValues) {
 
 const LOCALE = "sv-SE"; // YYYY-MM-DD HH:MM:SS format
 
-// --- Add time log ---
-
 function addTimeLog(issueBodyLines, locale) {
   const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
 
@@ -64,8 +60,6 @@ function addTimeLog(issueBodyLines, locale) {
 
   return issueBodyLines.toSpliced(lineIndexOfLastEntry + 1, 0, newEntry);
 }
-
-// --- Complete time log ---
 
 function completeLastTimeLog(issueBodyLines, locale) {
   const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
