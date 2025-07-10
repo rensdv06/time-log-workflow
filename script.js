@@ -108,4 +108,4 @@ function main(github, context) {
   });
 }
 
-export default main;
+module.exports = main;

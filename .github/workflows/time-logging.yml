@@ -1,44 +1,22 @@
-name: Add time log entry
+name: Time logging
 
 on:
   issues:
-    types: labeled
+    types: [labeled, unlabeled]
 
 permissions:
   issues: write
 
 jobs:
-  add-time-log-entry:
+  time-logging:
     if: github.event.label.name == 'in progress'
     runs-on: ubuntu-latest
     steps:
-      - name: Add time log entry to issue body
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Update time log in issue
         uses: actions/github-script@v7
         with:
           script: |
-            const now = new Date();
-            const nowString = now.toLocaleString("sv-SE", {timeZone: "Europe/Amsterdam"}); // YYYY-MM-DD HH:MM:SS format
-
-            console.log(now.toString());
-            console.log(nowString);
-
-            const testDate = new Date("2025-07-06 13:00:00");
-            const timeZoneOffset = new Date(now.toLocaleString("sv-SE", {timeZone: "Europe/Amsterdam"})) - now;
-            const testDateCorrectTimeZone = new Date(testDate - timeZoneOffset);
-
-            console.log(timeZoneOffset);
-            console.log(testDate.toString());
-            console.log(testDateCorrectTimeZone.toString());
-
-            const newTimeLogEntry = `| ${nowString} |                     |          |`;
-            const newIssueBody = context.payload.issue.body.replace(
-              /(?<=## Time log.+\|)\n(?!\|)/ms,
-              "$&" + newTimeLogEntry + "\n"
-            );
-
-            await github.rest.issues.update({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.issue.number,
-              body: newIssueBody
-            });
+            const main = require("script.js")
+            main(github, context);
