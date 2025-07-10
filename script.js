@@ -1,9 +1,5 @@
 // --- General ---
 
-function splitLines(string) {
-  return string.split("\n");
-}
-
 function getLineIsFromTable(line) {
   return /\|.+\|/.test(line);
 }
@@ -52,10 +48,6 @@ function stringReplaceWithMultipleValues(string, searchValue, replaceValues) {
     searchValue,
     () => replaceValues[replacedValuesCounter++]
   );
-}
-
-function joinLines(lines) {
-  return lines.join("\n");
 }
 
 const LOCALE = "sv-SE"; // YYYY-MM-DD HH:MM:SS format
