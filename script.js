@@ -48,8 +48,6 @@ function stringReplaceWithMultipleValues(string, searchValue, replaceValues) {
   );
 }
 
-const LOCALE = "sv-SE"; // YYYY-MM-DD HH:MM:SS format
-
 function addTimeLog(issueBodyLines, locale) {
   const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
 
@@ -88,3 +86,26 @@ function completeLastTimeLog(issueBodyLines, locale) {
 
   return issueBodyLines;
 }
+
+function main(github, context) {
+  const issueBodyLines = context.payload.issue.body.split("\n");
+  const LOCALE = "sv-SE"; // YYYY-MM-DD HH:MM:SS format
+
+  const eventAction = context.payload.event.action;
+  let updatedIssueBodyLines;
+  if (eventAction === "labeled") {
+    updatedIssueBodyLines = addTimeLog(issueBodyLines, LOCALE);
+  } else if (eventAction === "unlabeled") {
+    updatedIssueBodyLines = completeLastTimeLog(issueBodyLines, LOCALE);
+  }
+
+  const updatedIssueBody = updatedIssueBodyLines.join("\n");
+  github.rest.issues.update({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    issue_number: context.payload.issue.number,
+    body: updatedIssueBody,
+  });
+}
+
+export default main;
