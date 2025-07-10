@@ -88,6 +88,8 @@ function completeLastTimeLog(issueBodyLines, locale) {
 }
 
 function main(github, context) {
+  console.log(JSON.stringify(context));
+
   const issueBodyLines = context.payload.issue.body.split("\n");
   const LOCALE = "sv-SE"; // YYYY-MM-DD HH:MM:SS format
 
