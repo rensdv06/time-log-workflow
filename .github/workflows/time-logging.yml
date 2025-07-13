@@ -19,5 +19,5 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const main = require("./script.js")
+            const main = require("./dist/script.js")
             main(github, context);

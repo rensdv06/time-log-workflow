@@ -1,0 +1,25 @@
+{
+  "name": "time-log-workflow",
+  "version": "1.0.0",
+  "description": "A GitHub workflow to automatically log time spent on an issue in its description by toggling a label",
+  "homepage": "https://github.com/rensdv06/time-log-workflow",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rensdv06/time-log-workflow.git"
+  },
+  "license": "MIT",
+  "author": "rensdv06",
+  "type": "commonjs",
+  "main": "dist/script.js",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.13",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@actions/github": "^6.0.1"
+  }
+}
