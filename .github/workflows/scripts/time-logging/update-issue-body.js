@@ -49,7 +49,7 @@ function addTimeLog(issueBodyLines, locale) {
     const newEntry = `| ${startString} |                     |          |`;
     return issueBodyLines.toSpliced(lineIndexOfLastEntry + 1, 0, newEntry);
 }
-function completeLastTimeLog(issueBodyLines, locale) {
+function completeLastTimeLog(issueBodyLines, locale, core) {
     const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
     const lastEntry = issueBodyLines[lineIndexOfLastEntry];
     const now = new Date();
@@ -61,6 +61,8 @@ function completeLastTimeLog(issueBodyLines, locale) {
     const start = dateStringToDate(startString, nowString, now);
     const startTimestamp = start.getTime();
     const duration = new Date(endTimestamp - startTimestamp);
+    const durationMinutes = Math.round(duration.getTime() / 1000 / 60);
+    core.setOutput("duration_minutes", durationMinutes);
     const durationString = duration.toLocaleTimeString(locale, {
         timeZone: "UTC",
     });
@@ -69,7 +71,7 @@ function completeLastTimeLog(issueBodyLines, locale) {
     issueBodyLines[lineIndexOfLastEntry] = stringReplaceWithMultipleValues(lastEntry, updatedValuesPattern, updatedValues);
     return issueBodyLines;
 }
-function main(github, context) {
+function main(github, context, core) {
     const issue = context.payload.issue;
     const issueBodyLines = issue.body.split("\n");
     const LOCALE = "sv-SE"; // YYYY-MM-DD HH:MM:SS format
@@ -79,7 +81,7 @@ function main(github, context) {
         updatedIssueBodyLines = addTimeLog(issueBodyLines, LOCALE);
     }
     else if (eventAction === "unlabeled") {
-        updatedIssueBodyLines = completeLastTimeLog(issueBodyLines, LOCALE);
+        updatedIssueBodyLines = completeLastTimeLog(issueBodyLines, LOCALE, core);
     }
     else {
         throw new Error("Unknown value of eventAction: " + eventAction);
