@@ -32,5 +32,6 @@ jobs:
             const main = require("./.github/workflows/scripts/time-logging/update-time-remaining.js");
             main(github, context, {
               durationMinutes: ${{steps.update_time_log_in_issue.outputs.duration_minutes}},
+              timeEstimateFieldId: "${{vars.TIME_ESTIMATE_FIELD_ID}}",
               timeRemainingFieldId: "${{vars.TIME_REMAINING_FIELD_ID}}",
             });

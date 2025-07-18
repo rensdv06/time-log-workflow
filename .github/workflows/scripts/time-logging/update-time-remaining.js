@@ -20,12 +20,12 @@ async function getItemId(github, context) {
     const response = await github.graphql(query, variables);
     return response.node.projectItems.nodes[0].id;
 }
-async function getTimeRemaining(github, itemId, timeRemainingFieldId) {
+async function getItemNumberFieldNumber(github, itemId, numberFieldId) {
     const query = `
     query($itemId: ID!) {
       node(id: $itemId) {
         ... on ProjectV2Item {
-          fieldValues(first: 8) {
+          fieldValues(first: 20) {
             nodes {
               ... on ProjectV2ItemFieldNumberValue {
                 number,
@@ -45,11 +45,15 @@ async function getTimeRemaining(github, itemId, timeRemainingFieldId) {
     const response = await github.graphql(query, variables);
     const numberFieldsValues = response.node.fieldValues.nodes;
     const numberFieldValue = numberFieldsValues.find((numberFieldValues) => numberFieldValues.field !== undefined &&
-        numberFieldValues.field.id === timeRemainingFieldId);
-    return numberFieldValue.number;
+        numberFieldValues.field.id === numberFieldId);
+    return numberFieldValue?.number; // numberFieldValue is undefined when the number property is not set
 }
 async function main(github, context, variables) {
     const itemId = await getItemId(github, context);
-    const timeRemaining = await getTimeRemaining(github, itemId, variables.timeRemainingFieldId);
+    const timeRemaining = (await getItemNumberFieldNumber(github, itemId, variables.timeRemainingFieldId)) ??
+        (await getItemNumberFieldNumber(github, itemId, variables.timeEstimateFieldId));
+    if (timeRemaining === undefined) {
+        return;
+    }
 }
 module.exports = main;

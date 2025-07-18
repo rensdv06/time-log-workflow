@@ -47,16 +47,16 @@ interface NumberFieldValuesQueryResponse {
   };
 }
 
-async function getTimeRemaining(
+async function getItemNumberFieldNumber(
   github: GitHub,
   itemId: string,
-  timeRemainingFieldId: string
+  numberFieldId: string
 ) {
   const query = `
     query($itemId: ID!) {
       node(id: $itemId) {
         ... on ProjectV2Item {
-          fieldValues(first: 8) {
+          fieldValues(first: 20) {
             nodes {
               ... on ProjectV2ItemFieldNumberValue {
                 number,
@@ -82,23 +82,34 @@ async function getTimeRemaining(
   const numberFieldValue = numberFieldsValues.find(
     (numberFieldValues) =>
       numberFieldValues.field !== undefined &&
-      numberFieldValues.field.id === timeRemainingFieldId
+      numberFieldValues.field.id === numberFieldId
   );
-  return numberFieldValue!.number;
+  return numberFieldValue?.number; // numberFieldValue is undefined when the number property is not set
 }
 
 interface Variables {
   durationMinutes: number;
+  timeEstimateFieldId: string;
   timeRemainingFieldId: string;
 }
 
 async function main(github: GitHub, context: Context, variables: Variables) {
   const itemId = await getItemId(github, context);
-  const timeRemaining = await getTimeRemaining(
-    github,
-    itemId,
-    variables.timeRemainingFieldId
-  );
+  const timeRemaining =
+    (await getItemNumberFieldNumber(
+      github,
+      itemId,
+      variables.timeRemainingFieldId
+    )) ??
+    (await getItemNumberFieldNumber(
+      github,
+      itemId,
+      variables.timeEstimateFieldId
+    ));
+
+  if (timeRemaining === undefined) {
+    return;
+  }
 }
 
 module.exports = main;
