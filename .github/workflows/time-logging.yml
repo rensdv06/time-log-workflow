@@ -12,6 +12,7 @@ jobs:
   time-logging:
     if: github.event.label.name == 'in progress'
     runs-on: ubuntu-latest
+    environment: time-logging
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -29,4 +30,7 @@ jobs:
           github-token: ${{secrets.PERSONAL_ACCESS_TOKEN}}
           script: |
             const main = require("./.github/workflows/scripts/time-logging/update-time-remaining.js");
-            main(github, context, ${{steps.update_time_log_in_issue.outputs.duration_minutes}});
+            main(github, context, {
+              durationMinutes: ${{steps.update_time_log_in_issue.outputs.duration_minutes}},
+              timeRemainingFieldId: "${{vars.TIME_REMAINING_FIELD_ID}}",
+            });
