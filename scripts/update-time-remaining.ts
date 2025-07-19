@@ -2,24 +2,30 @@ import { GitHub } from "@actions/github/lib/utils";
 
 type GitHub = InstanceType<typeof GitHub>;
 
-interface ItemIdQueryResponse {
+interface ItemQueryResponse {
   node: {
     projectItems: {
       nodes: {
         id: string;
+        project: {
+          id: string;
+        };
       }[];
     };
   };
 }
 
-async function getItemId(github: GitHub, issueId: string) {
+async function getItem(github: GitHub, issueId: string) {
   const query = `
     query($issueId: ID!) {
       node(id: $issueId) {
         ... on Issue {
           projectItems(first: 1) {
             nodes {
-              id
+              id,
+              project {
+                id
+              }
             }
           }
         }
@@ -27,8 +33,8 @@ async function getItemId(github: GitHub, issueId: string) {
     }
   `;
   const variables = { issueId };
-  const response = await github.graphql<ItemIdQueryResponse>(query, variables);
-  return response.node.projectItems.nodes[0].id;
+  const response = await github.graphql<ItemQueryResponse>(query, variables);
+  return response.node.projectItems.nodes[0];
 }
 
 interface NumberFieldValuesQueryResponse {
@@ -84,6 +90,30 @@ async function getItemNumberFieldNumber(
   return numberFieldValue?.number; // numberFieldValue is undefined when the number property is not set
 }
 
+interface SetItemNumberFieldNumberInput {
+  projectId: string;
+  itemId: string;
+  fieldId: string;
+  value: number;
+}
+
+async function setItemNumberFieldNumber(
+  github: GitHub,
+  input: SetItemNumberFieldNumberInput
+) {
+  const query = `
+    mutation($input: UpdateProjectV2ItemFieldValueInput!) {
+      updateProjectV2ItemFieldValue(input: $input) {
+        projectV2Item {
+          id
+        }
+      }
+    }
+  `;
+  const variables = { input: { ...input, value: { number: input.value } } };
+  await github.graphql(query, variables);
+}
+
 interface FieldIds {
   timeEstimateFieldId: string;
   timeRemainingFieldId: string;
@@ -95,15 +125,24 @@ async function main(
   fieldIds: FieldIds,
   durationMinutes: number
 ) {
-  const itemId = await getItemId(github, issueId);
+  const item = await getItem(github, issueId);
   const { timeRemainingFieldId, timeEstimateFieldId } = fieldIds;
 
   const timeRemaining =
-    (await getItemNumberFieldNumber(github, itemId, timeRemainingFieldId)) ??
-    (await getItemNumberFieldNumber(github, itemId, timeEstimateFieldId));
+    (await getItemNumberFieldNumber(github, item.id, timeRemainingFieldId)) ??
+    (await getItemNumberFieldNumber(github, item.id, timeEstimateFieldId));
   if (timeRemaining === undefined) {
     return;
   }
+
+  const updatedTimeRemaining = timeRemaining - durationMinutes;
+  const updateTimeRemainingInput = {
+    projectId: item.project.id,
+    itemId: item.id,
+    fieldId: timeRemainingFieldId,
+    value: updatedTimeRemaining,
+  };
+  setItemNumberFieldNumber(github, updateTimeRemainingInput);
 }
 
 module.exports = main;
