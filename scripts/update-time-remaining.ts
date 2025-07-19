@@ -1,5 +1,4 @@
 import { GitHub } from "@actions/github/lib/utils";
-import { Context } from "@actions/github/lib/context";
 
 type GitHub = InstanceType<typeof GitHub>;
 
@@ -13,7 +12,7 @@ interface ItemIdQueryResponse {
   };
 }
 
-async function getItemId(github: GitHub, context: Context) {
+async function getItemId(github: GitHub, issueId: string) {
   const query = `
     query($issueId: ID!) {
       node(id: $issueId) {
@@ -27,9 +26,7 @@ async function getItemId(github: GitHub, context: Context) {
       }
     }
   `;
-  const variables = {
-    issueId: context.payload.issue!.node_id,
-  };
+  const variables = { issueId };
   const response = await github.graphql<ItemIdQueryResponse>(query, variables);
   return response.node.projectItems.nodes[0].id;
 }
@@ -87,26 +84,23 @@ async function getItemNumberFieldNumber(
   return numberFieldValue?.number; // numberFieldValue is undefined when the number property is not set
 }
 
-interface Variables {
-  durationMinutes: number;
+interface FieldIds {
   timeEstimateFieldId: string;
   timeRemainingFieldId: string;
 }
 
-async function main(github: GitHub, context: Context, variables: Variables) {
-  const itemId = await getItemId(github, context);
-  const timeRemaining =
-    (await getItemNumberFieldNumber(
-      github,
-      itemId,
-      variables.timeRemainingFieldId
-    )) ??
-    (await getItemNumberFieldNumber(
-      github,
-      itemId,
-      variables.timeEstimateFieldId
-    ));
+async function main(
+  github: GitHub,
+  issueId: string,
+  fieldIds: FieldIds,
+  durationMinutes: number
+) {
+  const itemId = await getItemId(github, issueId);
+  const { timeRemainingFieldId, timeEstimateFieldId } = fieldIds;
 
+  const timeRemaining =
+    (await getItemNumberFieldNumber(github, itemId, timeRemainingFieldId)) ??
+    (await getItemNumberFieldNumber(github, itemId, timeEstimateFieldId));
   if (timeRemaining === undefined) {
     return;
   }
