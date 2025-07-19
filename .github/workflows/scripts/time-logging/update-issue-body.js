@@ -61,7 +61,8 @@ function completeLastTimeLog(issueBodyLines, locale, core) {
     const start = dateStringToDate(startString, nowString, now);
     const startTimestamp = start.getTime();
     const duration = new Date(endTimestamp - startTimestamp);
-    const durationMinutes = Math.round(duration.getTime() / 1000 / 60);
+    const durationMilliseconds = duration.getTime();
+    const durationMinutes = Math.round(durationMilliseconds / 1000 / 60);
     core.setOutput("duration_minutes", durationMinutes);
     const durationString = duration.toLocaleTimeString(locale, {
         timeZone: "UTC",
