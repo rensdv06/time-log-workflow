@@ -67,9 +67,9 @@ function completeLastTimeLog(issueBodyLines, locale, core) {
     const durationString = duration.toLocaleTimeString(locale, {
         timeZone: "UTC",
     });
-    const updatedValuesPattern = /(?<=\| .+ \| )[^\|]+(?= \|)/g;
+    const valuesToUpdatePattern = /(?<=\| .+ \| )[^\|]+(?= \|)/g;
     const updatedValues = [endString, durationString];
-    issueBodyLines[lineIndexOfLastEntry] = stringReplaceWithMultipleValues(lastEntry, updatedValuesPattern, updatedValues);
+    issueBodyLines[lineIndexOfLastEntry] = stringReplaceWithMultipleValues(lastEntry, valuesToUpdatePattern, updatedValues);
     return issueBodyLines;
 }
 function main(github, context, core) {

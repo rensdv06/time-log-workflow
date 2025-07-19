@@ -103,11 +103,11 @@ function completeLastTimeLog(
     timeZone: "UTC",
   });
 
-  const updatedValuesPattern = /(?<=\| .+ \| )[^\|]+(?= \|)/g;
+  const valuesToUpdatePattern = /(?<=\| .+ \| )[^\|]+(?= \|)/g;
   const updatedValues = [endString, durationString];
   issueBodyLines[lineIndexOfLastEntry] = stringReplaceWithMultipleValues(
     lastEntry,
-    updatedValuesPattern,
+    valuesToUpdatePattern,
     updatedValues
   );
 
