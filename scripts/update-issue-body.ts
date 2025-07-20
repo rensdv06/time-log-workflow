@@ -32,6 +32,17 @@ function dateToLocaleString(date: Date, locale: Intl.LocalesArgument) {
   return date.toLocaleString(locale, { timeZone: "Europe/Amsterdam" });
 }
 
+function addTimeLog(issueBodyLines: string[], locale: Intl.LocalesArgument) {
+  const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
+
+  const now = new Date();
+  const nowString = dateToLocaleString(now, locale);
+  const startString = nowString;
+  const newEntry = `| ${startString} |                     |          |`;
+
+  return issueBodyLines.toSpliced(lineIndexOfLastEntry + 1, 0, newEntry);
+}
+
 function getStartOfTimeLogEntry(timeLogEntry: string) {
   const startPattern = /(?<=\| )[^\|]+(?= \|)/;
   const startMatches = timeLogEntry.match(startPattern);
@@ -49,29 +60,6 @@ function dateStringToDate(dateString: string, nowString: string, now: Date) {
   const timeZoneOffset = nowWithTimeZoneOffset.getTime() - now.getTime();
 
   return new Date(timestampWithTimeZoneOffset - timeZoneOffset);
-}
-
-function stringReplaceWithMultipleValues(
-  string: string,
-  searchValue: string | RegExp,
-  replaceValues: string[]
-) {
-  let replacedValuesCounter = 0;
-  return string.replace(
-    searchValue,
-    () => replaceValues[replacedValuesCounter++]
-  );
-}
-
-function addTimeLog(issueBodyLines: string[], locale: Intl.LocalesArgument) {
-  const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
-
-  const now = new Date();
-  const nowString = dateToLocaleString(now, locale);
-  const startString = nowString;
-  const newEntry = `| ${startString} |                     |          |`;
-
-  return issueBodyLines.toSpliced(lineIndexOfLastEntry + 1, 0, newEntry);
 }
 
 function getDuration(
@@ -93,6 +81,18 @@ function setDurationMinutesOutput(duration: Date, core: Core) {
   const durationMilliseconds = duration.getTime();
   const durationMinutes = Math.round(durationMilliseconds / 1000 / 60);
   core.setOutput("duration_minutes", durationMinutes);
+}
+
+function stringReplaceWithMultipleValues(
+  string: string,
+  searchValue: string | RegExp,
+  replaceValues: string[]
+) {
+  let replacedValuesCounter = 0;
+  return string.replace(
+    searchValue,
+    () => replaceValues[replacedValuesCounter++]
+  );
 }
 
 function completeLastTimeLog(
