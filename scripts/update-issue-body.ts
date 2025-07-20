@@ -62,18 +62,9 @@ function dateStringToDate(dateString: string, nowString: string, now: Date) {
   return new Date(timestampWithTimeZoneOffset - timeZoneOffset);
 }
 
-function getDuration(
-  end: Date,
-  lastEntry: string,
-  nowString: string,
-  now: Date
-) {
+function getDuration(end: Date, start: Date) {
   const endTimestamp = end.getTime();
-
-  const startString = getStartOfTimeLogEntry(lastEntry);
-  const start = dateStringToDate(startString, nowString, now);
   const startTimestamp = start.getTime();
-
   return new Date(endTimestamp - startTimestamp);
 }
 
@@ -109,7 +100,10 @@ function completeLastTimeLog(
   const endString = nowString;
   const end = now;
 
-  const duration = getDuration(end, lastEntry, nowString, now);
+  const startString = getStartOfTimeLogEntry(lastEntry);
+  const start = dateStringToDate(startString, nowString, now);
+
+  const duration = getDuration(end, start);
   setDurationMinutesOutput(duration, core);
   const durationString = duration.toLocaleTimeString(locale, {
     timeZone: "UTC",
