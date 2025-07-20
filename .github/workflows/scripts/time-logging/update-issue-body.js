@@ -22,7 +22,7 @@ function getLineIndexOfLastEntry(issueBodyLines) {
 function dateToLocaleString(date, locale) {
     return date.toLocaleString(locale, { timeZone: "Europe/Amsterdam" });
 }
-function addTimeLog(issueBodyLines, locale) {
+function addNewEntry(issueBodyLines, locale) {
     const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
     const now = new Date();
     const nowString = dateToLocaleString(now, locale);
@@ -30,11 +30,11 @@ function addTimeLog(issueBodyLines, locale) {
     const newEntry = `| ${startString} |                     |          |`;
     return issueBodyLines.toSpliced(lineIndexOfLastEntry + 1, 0, newEntry);
 }
-function getStartOfTimeLogEntry(timeLogEntry) {
+function getStartStringFromEntry(entry) {
     const startPattern = /(?<=\| )[^\|]+(?= \|)/;
-    const startMatches = timeLogEntry.match(startPattern);
+    const startMatches = entry.match(startPattern);
     if (startMatches === null) {
-        throw new Error("No start match found in time log entry: " + timeLogEntry);
+        throw new Error("No start match found in entry: " + entry);
     }
     return startMatches[0];
 }
@@ -59,14 +59,14 @@ function stringReplaceWithMultipleValues(string, searchValue, replaceValues) {
     let replacedValuesCounter = 0;
     return string.replace(searchValue, () => replaceValues[replacedValuesCounter++]);
 }
-function completeLastTimeLog(issueBodyLines, locale, core) {
+function completeLastEntry(issueBodyLines, locale, core) {
     const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
     const lastEntry = issueBodyLines[lineIndexOfLastEntry];
     const now = new Date();
     const nowString = dateToLocaleString(now, locale);
     const endString = nowString;
     const end = now;
-    const startString = getStartOfTimeLogEntry(lastEntry);
+    const startString = getStartStringFromEntry(lastEntry);
     const start = dateStringToDate(startString, nowString, now);
     const duration = getDuration(end, start);
     setDurationMinutesOutput(duration, core);
@@ -85,10 +85,10 @@ function main(github, context, core) {
     const eventAction = context.payload.action;
     let updatedIssueBodyLines;
     if (eventAction === "labeled") {
-        updatedIssueBodyLines = addTimeLog(issueBodyLines, LOCALE);
+        updatedIssueBodyLines = addNewEntry(issueBodyLines, LOCALE);
     }
     else if (eventAction === "unlabeled") {
-        updatedIssueBodyLines = completeLastTimeLog(issueBodyLines, LOCALE, core);
+        updatedIssueBodyLines = completeLastEntry(issueBodyLines, LOCALE, core);
     }
     else {
         throw new Error("Unknown value of eventAction: " + eventAction);

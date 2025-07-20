@@ -32,7 +32,7 @@ function dateToLocaleString(date: Date, locale: Intl.LocalesArgument) {
   return date.toLocaleString(locale, { timeZone: "Europe/Amsterdam" });
 }
 
-function addTimeLog(issueBodyLines: string[], locale: Intl.LocalesArgument) {
+function addNewEntry(issueBodyLines: string[], locale: Intl.LocalesArgument) {
   const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
 
   const now = new Date();
@@ -43,11 +43,11 @@ function addTimeLog(issueBodyLines: string[], locale: Intl.LocalesArgument) {
   return issueBodyLines.toSpliced(lineIndexOfLastEntry + 1, 0, newEntry);
 }
 
-function getStartOfTimeLogEntry(timeLogEntry: string) {
+function getStartStringFromEntry(entry: string) {
   const startPattern = /(?<=\| )[^\|]+(?= \|)/;
-  const startMatches = timeLogEntry.match(startPattern);
+  const startMatches = entry.match(startPattern);
   if (startMatches === null) {
-    throw new Error("No start match found in time log entry: " + timeLogEntry);
+    throw new Error("No start match found in entry: " + entry);
   }
   return startMatches[0];
 }
@@ -86,7 +86,7 @@ function stringReplaceWithMultipleValues(
   );
 }
 
-function completeLastTimeLog(
+function completeLastEntry(
   issueBodyLines: string[],
   locale: Intl.LocalesArgument,
   core: Core
@@ -100,7 +100,7 @@ function completeLastTimeLog(
   const endString = nowString;
   const end = now;
 
-  const startString = getStartOfTimeLogEntry(lastEntry);
+  const startString = getStartStringFromEntry(lastEntry);
   const start = dateStringToDate(startString, nowString, now);
 
   const duration = getDuration(end, start);
@@ -128,9 +128,9 @@ function main(github: GitHub, context: Context, core: Core) {
   const eventAction = context.payload.action;
   let updatedIssueBodyLines: string[];
   if (eventAction === "labeled") {
-    updatedIssueBodyLines = addTimeLog(issueBodyLines, LOCALE);
+    updatedIssueBodyLines = addNewEntry(issueBodyLines, LOCALE);
   } else if (eventAction === "unlabeled") {
-    updatedIssueBodyLines = completeLastTimeLog(issueBodyLines, LOCALE, core);
+    updatedIssueBodyLines = completeLastEntry(issueBodyLines, LOCALE, core);
   } else {
     throw new Error("Unknown value of eventAction: " + eventAction);
   }
