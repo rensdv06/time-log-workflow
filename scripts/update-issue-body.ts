@@ -89,6 +89,12 @@ function getDuration(
   return new Date(endTimestamp - startTimestamp);
 }
 
+function setDurationMinutesOutput(duration: Date, core: Core) {
+  const durationMilliseconds = duration.getTime();
+  const durationMinutes = Math.round(durationMilliseconds / 1000 / 60);
+  core.setOutput("duration_minutes", durationMinutes);
+}
+
 function completeLastTimeLog(
   issueBodyLines: string[],
   locale: Intl.LocalesArgument,
@@ -104,11 +110,7 @@ function completeLastTimeLog(
   const end = now;
 
   const duration = getDuration(end, lastEntry, nowString, now);
-  const durationMilliseconds = duration.getTime();
-
-  const durationMinutes = Math.round(durationMilliseconds / 1000 / 60);
-  core.setOutput("duration_minutes", durationMinutes);
-
+  setDurationMinutesOutput(duration, core);
   const durationString = duration.toLocaleTimeString(locale, {
     timeZone: "UTC",
   });

@@ -56,6 +56,11 @@ function getDuration(end, lastEntry, nowString, now) {
     const startTimestamp = start.getTime();
     return new Date(endTimestamp - startTimestamp);
 }
+function setDurationMinutesOutput(duration, core) {
+    const durationMilliseconds = duration.getTime();
+    const durationMinutes = Math.round(durationMilliseconds / 1000 / 60);
+    core.setOutput("duration_minutes", durationMinutes);
+}
 function completeLastTimeLog(issueBodyLines, locale, core) {
     const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
     const lastEntry = issueBodyLines[lineIndexOfLastEntry];
@@ -64,9 +69,7 @@ function completeLastTimeLog(issueBodyLines, locale, core) {
     const endString = nowString;
     const end = now;
     const duration = getDuration(end, lastEntry, nowString, now);
-    const durationMilliseconds = duration.getTime();
-    const durationMinutes = Math.round(durationMilliseconds / 1000 / 60);
-    core.setOutput("duration_minutes", durationMinutes);
+    setDurationMinutesOutput(duration, core);
     const durationString = duration.toLocaleTimeString(locale, {
         timeZone: "UTC",
     });
