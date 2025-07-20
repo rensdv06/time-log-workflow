@@ -49,6 +49,13 @@ function addTimeLog(issueBodyLines, locale) {
     const newEntry = `| ${startString} |                     |          |`;
     return issueBodyLines.toSpliced(lineIndexOfLastEntry + 1, 0, newEntry);
 }
+function getDuration(end, lastEntry, nowString, now) {
+    const endTimestamp = end.getTime();
+    const startString = getStartOfTimeLogEntry(lastEntry);
+    const start = dateStringToDate(startString, nowString, now);
+    const startTimestamp = start.getTime();
+    return new Date(endTimestamp - startTimestamp);
+}
 function completeLastTimeLog(issueBodyLines, locale, core) {
     const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
     const lastEntry = issueBodyLines[lineIndexOfLastEntry];
@@ -56,11 +63,7 @@ function completeLastTimeLog(issueBodyLines, locale, core) {
     const nowString = dateToLocaleString(now, locale);
     const endString = nowString;
     const end = now;
-    const endTimestamp = end.getTime();
-    const startString = getStartOfTimeLogEntry(lastEntry);
-    const start = dateStringToDate(startString, nowString, now);
-    const startTimestamp = start.getTime();
-    const duration = new Date(endTimestamp - startTimestamp);
+    const duration = getDuration(end, lastEntry, nowString, now);
     const durationMilliseconds = duration.getTime();
     const durationMinutes = Math.round(durationMilliseconds / 1000 / 60);
     core.setOutput("duration_minutes", durationMinutes);

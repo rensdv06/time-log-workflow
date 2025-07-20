@@ -74,6 +74,21 @@ function addTimeLog(issueBodyLines: string[], locale: Intl.LocalesArgument) {
   return issueBodyLines.toSpliced(lineIndexOfLastEntry + 1, 0, newEntry);
 }
 
+function getDuration(
+  end: Date,
+  lastEntry: string,
+  nowString: string,
+  now: Date
+) {
+  const endTimestamp = end.getTime();
+
+  const startString = getStartOfTimeLogEntry(lastEntry);
+  const start = dateStringToDate(startString, nowString, now);
+  const startTimestamp = start.getTime();
+
+  return new Date(endTimestamp - startTimestamp);
+}
+
 function completeLastTimeLog(
   issueBodyLines: string[],
   locale: Intl.LocalesArgument,
@@ -87,13 +102,8 @@ function completeLastTimeLog(
 
   const endString = nowString;
   const end = now;
-  const endTimestamp = end.getTime();
 
-  const startString = getStartOfTimeLogEntry(lastEntry);
-  const start = dateStringToDate(startString, nowString, now);
-  const startTimestamp = start.getTime();
-
-  const duration = new Date(endTimestamp - startTimestamp);
+  const duration = getDuration(end, lastEntry, nowString, now);
   const durationMilliseconds = duration.getTime();
 
   const durationMinutes = Math.round(durationMilliseconds / 1000 / 60);
