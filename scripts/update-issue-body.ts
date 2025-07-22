@@ -38,7 +38,7 @@ function addNewEntry(issueBodyLines: string[], locale: Intl.LocalesArgument) {
   const now = new Date();
   const nowString = dateToLocaleString(now, locale);
   const startString = nowString;
-  const newEntry = `| ${startString} |                     |          |`;
+  const newEntry = `| ${startString} |                     |          |         |`;
 
   return issueBodyLines.toSpliced(lineIndexOfLastEntry + 1, 0, newEntry);
 }
@@ -74,6 +74,28 @@ function setDurationMinutesOutput(duration: Date, core: Core) {
   core.setOutput("duration_minutes", durationMinutes);
 }
 
+function dateStringToIsoString(dateString: string) {
+  return dateString.replace(" ", "T") + "Z";
+}
+
+async function getCommitsBetweenDates(
+  github: GitHub,
+  repo: Context["repo"],
+  sinceString: string,
+  untilString: string
+) {
+  const sinceIsoString = dateStringToIsoString(sinceString);
+  const untilIsoString = dateStringToIsoString(untilString);
+
+  const response = await github.rest.repos.listCommits({
+    owner: repo.owner,
+    repo: repo.repo,
+    since: sinceIsoString,
+    until: untilIsoString,
+  });
+  return response.data;
+}
+
 function stringReplaceWithMultipleValues(
   string: string,
   searchValue: string | RegExp,
@@ -86,10 +108,16 @@ function stringReplaceWithMultipleValues(
   );
 }
 
+interface Commit {
+  sha: string;
+  html_url: string;
+}
+
 function completeLastEntry(
   issueBodyLines: string[],
   locale: Intl.LocalesArgument,
-  core: Core
+  core: Core,
+  getCommits: (since: string, until: string) => Promise<Commit[]>
 ) {
   const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
   const lastEntry = issueBodyLines[lineIndexOfLastEntry];
@@ -108,6 +136,8 @@ function completeLastEntry(
   const durationString = duration.toLocaleTimeString(locale, {
     timeZone: "UTC",
   });
+
+  const commits = getCommits(startString, endString);
 
   const valuesToUpdatePattern = /(?<=\| .+ \| )[^\|]+(?= \|)/g;
   const updatedValues = [endString, durationString];
@@ -130,7 +160,13 @@ function main(github: GitHub, context: Context, core: Core) {
   if (eventAction === "labeled") {
     updatedIssueBodyLines = addNewEntry(issueBodyLines, LOCALE);
   } else if (eventAction === "unlabeled") {
-    updatedIssueBodyLines = completeLastEntry(issueBodyLines, LOCALE, core);
+    updatedIssueBodyLines = completeLastEntry(
+      issueBodyLines,
+      LOCALE,
+      core,
+      (since, until) =>
+        getCommitsBetweenDates(github, context.repo, since, until)
+    );
   } else {
     throw new Error("Unknown value of eventAction: " + eventAction);
   }
