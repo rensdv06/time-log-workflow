@@ -96,6 +96,13 @@ function setDurationMinutesOutput(duration: Date, core: Core) {
   core.setOutput("duration_minutes", durationMinutes);
 }
 
+function getCommitHashesWithUrlString(commits: Commit[]) {
+  const commitHashesWithUrl = commits.map(
+    (commit) => `[${commit.sha.slice(0, 7)}](${commit.html_url})`
+  );
+  return commitHashesWithUrl.join(" ");
+}
+
 function stringReplaceWithMultipleValues(
   string: string,
   searchValue: string | RegExp,
@@ -113,7 +120,7 @@ interface Commit {
   html_url: string;
 }
 
-function completeLastEntry(
+async function completeLastEntry(
   issueBodyLines: string[],
   locale: Intl.LocalesArgument,
   core: Core,
@@ -137,10 +144,11 @@ function completeLastEntry(
     timeZone: "UTC",
   });
 
-  const commits = getCommits(startString, endString);
+  const commits = await getCommits(startString, endString);
+  const commitsString = getCommitHashesWithUrlString(commits);
 
   const valuesToUpdatePattern = /(?<=\| .+ \| )[^\|]+(?= \|)/g;
-  const updatedValues = [endString, durationString];
+  const updatedValues = [endString, durationString, commitsString];
   issueBodyLines[lineIndexOfLastEntry] = stringReplaceWithMultipleValues(
     lastEntry,
     valuesToUpdatePattern,
@@ -150,7 +158,7 @@ function completeLastEntry(
   return issueBodyLines;
 }
 
-function main(github: GitHub, context: Context, core: Core) {
+async function main(github: GitHub, context: Context, core: Core) {
   const issue = context.payload.issue!;
   const issueBodyLines = issue.body!.split("\n");
   const LOCALE = "sv-SE"; // YYYY-MM-DD HH:MM:SS format
@@ -160,7 +168,7 @@ function main(github: GitHub, context: Context, core: Core) {
   if (eventAction === "labeled") {
     updatedIssueBodyLines = addNewEntry(issueBodyLines, LOCALE);
   } else if (eventAction === "unlabeled") {
-    updatedIssueBodyLines = completeLastEntry(
+    updatedIssueBodyLines = await completeLastEntry(
       issueBodyLines,
       LOCALE,
       core,
