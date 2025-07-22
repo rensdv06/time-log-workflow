@@ -43,6 +43,28 @@ function addNewEntry(issueBodyLines: string[], locale: Intl.LocalesArgument) {
   return issueBodyLines.toSpliced(lineIndexOfLastEntry + 1, 0, newEntry);
 }
 
+function dateStringToIsoString(dateString: string) {
+  return dateString.replace(" ", "T") + "Z";
+}
+
+async function getCommitsBetweenDates(
+  github: GitHub,
+  repo: Context["repo"],
+  sinceString: string,
+  untilString: string
+) {
+  const sinceIsoString = dateStringToIsoString(sinceString);
+  const untilIsoString = dateStringToIsoString(untilString);
+
+  const response = await github.rest.repos.listCommits({
+    owner: repo.owner,
+    repo: repo.repo,
+    since: sinceIsoString,
+    until: untilIsoString,
+  });
+  return response.data;
+}
+
 function getStartStringFromEntry(entry: string) {
   const startPattern = /(?<=\| )[^\|]+(?= \|)/;
   const startMatches = entry.match(startPattern);
@@ -72,28 +94,6 @@ function setDurationMinutesOutput(duration: Date, core: Core) {
   const durationMilliseconds = duration.getTime();
   const durationMinutes = Math.round(durationMilliseconds / 1000 / 60);
   core.setOutput("duration_minutes", durationMinutes);
-}
-
-function dateStringToIsoString(dateString: string) {
-  return dateString.replace(" ", "T") + "Z";
-}
-
-async function getCommitsBetweenDates(
-  github: GitHub,
-  repo: Context["repo"],
-  sinceString: string,
-  untilString: string
-) {
-  const sinceIsoString = dateStringToIsoString(sinceString);
-  const untilIsoString = dateStringToIsoString(untilString);
-
-  const response = await github.rest.repos.listCommits({
-    owner: repo.owner,
-    repo: repo.repo,
-    since: sinceIsoString,
-    until: untilIsoString,
-  });
-  return response.data;
 }
 
 function stringReplaceWithMultipleValues(
