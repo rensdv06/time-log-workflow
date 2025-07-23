@@ -59,6 +59,15 @@ function removeMilliseconds(date: Date) {
   return date;
 }
 
+function getStartStringFromEntry(entry: string) {
+  const startPattern = /(?<=\| )[^\|]+(?= \|)/;
+  const startMatches = entry.match(startPattern);
+  if (startMatches === null) {
+    throw new Error("No start match found in entry: " + entry);
+  }
+  return startMatches[0];
+}
+
 function dateStringToDate(dateString: string) {
   const dateWithTimeZoneOffset = new Date(dateString);
   const timestampWithTimeZoneOffset = dateWithTimeZoneOffset.getTime();
@@ -70,6 +79,18 @@ function dateStringToDate(dateString: string) {
   const timeZoneOffset = nowWithTimeZoneOffset.getTime() - now.getTime();
 
   return new Date(timestampWithTimeZoneOffset - timeZoneOffset);
+}
+
+function getDuration(end: Date, start: Date) {
+  const endTimestamp = end.getTime();
+  const startTimestamp = start.getTime();
+  return new Date(endTimestamp - startTimestamp);
+}
+
+function setDurationMinutesOutput(duration: Date, core: Core) {
+  const durationMilliseconds = duration.getTime();
+  const durationMinutes = Math.round(durationMilliseconds / 1000 / 60);
+  core.setOutput("duration_minutes", durationMinutes);
 }
 
 function dateStringToIsoString(dateString: string) {
@@ -93,27 +114,6 @@ async function getCommitsBetweenDates(
     until: untilIsoString,
   });
   return response.data;
-}
-
-function getStartStringFromEntry(entry: string) {
-  const startPattern = /(?<=\| )[^\|]+(?= \|)/;
-  const startMatches = entry.match(startPattern);
-  if (startMatches === null) {
-    throw new Error("No start match found in entry: " + entry);
-  }
-  return startMatches[0];
-}
-
-function getDuration(end: Date, start: Date) {
-  const endTimestamp = end.getTime();
-  const startTimestamp = start.getTime();
-  return new Date(endTimestamp - startTimestamp);
-}
-
-function setDurationMinutesOutput(duration: Date, core: Core) {
-  const durationMilliseconds = duration.getTime();
-  const durationMinutes = Math.round(durationMilliseconds / 1000 / 60);
-  core.setOutput("duration_minutes", durationMinutes);
 }
 
 function commitsToHashesString(commits: Commit[]) {

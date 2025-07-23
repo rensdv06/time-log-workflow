@@ -40,6 +40,14 @@ function removeMilliseconds(date) {
     date.setMilliseconds(0);
     return date;
 }
+function getStartStringFromEntry(entry) {
+    const startPattern = /(?<=\| )[^\|]+(?= \|)/;
+    const startMatches = entry.match(startPattern);
+    if (startMatches === null) {
+        throw new Error("No start match found in entry: " + entry);
+    }
+    return startMatches[0];
+}
 function dateStringToDate(dateString) {
     const dateWithTimeZoneOffset = new Date(dateString);
     const timestampWithTimeZoneOffset = dateWithTimeZoneOffset.getTime();
@@ -48,6 +56,16 @@ function dateStringToDate(dateString) {
     const nowWithTimeZoneOffset = new Date(nowString);
     const timeZoneOffset = nowWithTimeZoneOffset.getTime() - now.getTime();
     return new Date(timestampWithTimeZoneOffset - timeZoneOffset);
+}
+function getDuration(end, start) {
+    const endTimestamp = end.getTime();
+    const startTimestamp = start.getTime();
+    return new Date(endTimestamp - startTimestamp);
+}
+function setDurationMinutesOutput(duration, core) {
+    const durationMilliseconds = duration.getTime();
+    const durationMinutes = Math.round(durationMilliseconds / 1000 / 60);
+    core.setOutput("duration_minutes", durationMinutes);
 }
 function dateStringToIsoString(dateString) {
     const date = dateStringToDate(dateString);
@@ -63,24 +81,6 @@ async function getCommitsBetweenDates(github, repo, sinceString, untilString) {
         until: untilIsoString,
     });
     return response.data;
-}
-function getStartStringFromEntry(entry) {
-    const startPattern = /(?<=\| )[^\|]+(?= \|)/;
-    const startMatches = entry.match(startPattern);
-    if (startMatches === null) {
-        throw new Error("No start match found in entry: " + entry);
-    }
-    return startMatches[0];
-}
-function getDuration(end, start) {
-    const endTimestamp = end.getTime();
-    const startTimestamp = start.getTime();
-    return new Date(endTimestamp - startTimestamp);
-}
-function setDurationMinutesOutput(duration, core) {
-    const durationMilliseconds = duration.getTime();
-    const durationMinutes = Math.round(durationMilliseconds / 1000 / 60);
-    core.setOutput("duration_minutes", durationMinutes);
 }
 function commitsToHashesString(commits) {
     const hashes = commits.map((commit) => commit.sha.slice(0, 7));
