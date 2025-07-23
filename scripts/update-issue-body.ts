@@ -37,6 +37,7 @@ function addNewEntry(issueBodyLines: string[], locale: Intl.LocalesArgument) {
 
   const now = new Date();
   const nowString = dateToLocaleString(now, locale);
+
   const startString = nowString;
   const newEntry = `| ${startString} |                     |          |         |`;
 
