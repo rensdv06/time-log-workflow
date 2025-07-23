@@ -43,18 +43,35 @@ function addNewEntry(issueBodyLines: string[], locale: Intl.LocalesArgument) {
   return issueBodyLines.toSpliced(lineIndexOfLastEntry + 1, 0, newEntry);
 }
 
-function dateStringToIsoString(dateString: string) {
-  return dateString.replace(" ", "T") + "Z";
+function dateStringToDate(dateString: string, locale: Intl.LocalesArgument) {
+  const dateWithTimeZoneOffset = new Date(dateString);
+  const timestampWithTimeZoneOffset = dateWithTimeZoneOffset.getTime();
+
+  const now = new Date();
+  const nowString = dateToLocaleString(now, locale);
+
+  const nowWithTimeZoneOffset = new Date(nowString);
+  const timeZoneOffset = nowWithTimeZoneOffset.getTime() - now.getTime();
+
+  return new Date(timestampWithTimeZoneOffset - timeZoneOffset);
+}
+
+function dateStringToIsoString(
+  dateString: string,
+  locale: Intl.LocalesArgument
+) {
+  const date = dateStringToDate(dateString, locale);
+  return date.toISOString().split(".")[0] + "Z";
 }
 
 async function getCommitsBetweenDates(
   github: GitHub,
   repo: Context["repo"],
-  sinceString: string,
-  untilString: string
+  dateStrings: { since: string; until: string },
+  locale: Intl.LocalesArgument
 ) {
-  const sinceIsoString = dateStringToIsoString(sinceString);
-  const untilIsoString = dateStringToIsoString(untilString);
+  const sinceIsoString = dateStringToIsoString(dateStrings.since, locale);
+  const untilIsoString = dateStringToIsoString(dateStrings.until, locale);
 
   const response = await github.rest.repos.listCommits({
     owner: repo.owner,
@@ -72,16 +89,6 @@ function getStartStringFromEntry(entry: string) {
     throw new Error("No start match found in entry: " + entry);
   }
   return startMatches[0];
-}
-
-function dateStringToDate(dateString: string, nowString: string, now: Date) {
-  const dateWithTimeZoneOffset = new Date(dateString);
-  const timestampWithTimeZoneOffset = dateWithTimeZoneOffset.getTime();
-
-  const nowWithTimeZoneOffset = new Date(nowString);
-  const timeZoneOffset = nowWithTimeZoneOffset.getTime() - now.getTime();
-
-  return new Date(timestampWithTimeZoneOffset - timeZoneOffset);
 }
 
 function getDuration(end: Date, start: Date) {
@@ -133,7 +140,7 @@ async function completeLastEntry(
   const end = now;
 
   const startString = getStartStringFromEntry(lastEntry);
-  const start = dateStringToDate(startString, nowString, now);
+  const start = dateStringToDate(startString, locale);
 
   const duration = getDuration(end, start);
   setDurationMinutesOutput(duration, core);
@@ -170,7 +177,7 @@ async function main(github: GitHub, context: Context, core: Core) {
       LOCALE,
       core,
       (since, until) =>
-        getCommitsBetweenDates(github, context.repo, since, until)
+        getCommitsBetweenDates(github, context.repo, { since, until }, LOCALE)
     );
   } else {
     throw new Error("Unknown value of eventAction: " + eventAction);

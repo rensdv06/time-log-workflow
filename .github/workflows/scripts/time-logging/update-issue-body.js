@@ -30,12 +30,22 @@ function addNewEntry(issueBodyLines, locale) {
     const newEntry = `| ${startString} |                     |          |         |`;
     return issueBodyLines.toSpliced(lineIndexOfLastEntry + 1, 0, newEntry);
 }
-function dateStringToIsoString(dateString) {
-    return dateString.replace(" ", "T") + "Z";
+function dateStringToDate(dateString, locale) {
+    const dateWithTimeZoneOffset = new Date(dateString);
+    const timestampWithTimeZoneOffset = dateWithTimeZoneOffset.getTime();
+    const now = new Date();
+    const nowString = dateToLocaleString(now, locale);
+    const nowWithTimeZoneOffset = new Date(nowString);
+    const timeZoneOffset = nowWithTimeZoneOffset.getTime() - now.getTime();
+    return new Date(timestampWithTimeZoneOffset - timeZoneOffset);
 }
-async function getCommitsBetweenDates(github, repo, sinceString, untilString) {
-    const sinceIsoString = dateStringToIsoString(sinceString);
-    const untilIsoString = dateStringToIsoString(untilString);
+function dateStringToIsoString(dateString, locale) {
+    const date = dateStringToDate(dateString, locale);
+    return date.toISOString().split(".")[0] + "Z";
+}
+async function getCommitsBetweenDates(github, repo, dateStrings, locale) {
+    const sinceIsoString = dateStringToIsoString(dateStrings.since, locale);
+    const untilIsoString = dateStringToIsoString(dateStrings.until, locale);
     const response = await github.rest.repos.listCommits({
         owner: repo.owner,
         repo: repo.repo,
@@ -51,13 +61,6 @@ function getStartStringFromEntry(entry) {
         throw new Error("No start match found in entry: " + entry);
     }
     return startMatches[0];
-}
-function dateStringToDate(dateString, nowString, now) {
-    const dateWithTimeZoneOffset = new Date(dateString);
-    const timestampWithTimeZoneOffset = dateWithTimeZoneOffset.getTime();
-    const nowWithTimeZoneOffset = new Date(nowString);
-    const timeZoneOffset = nowWithTimeZoneOffset.getTime() - now.getTime();
-    return new Date(timestampWithTimeZoneOffset - timeZoneOffset);
 }
 function getDuration(end, start) {
     const endTimestamp = end.getTime();
@@ -85,7 +88,7 @@ async function completeLastEntry(issueBodyLines, locale, core, getCommits) {
     const endString = nowString;
     const end = now;
     const startString = getStartStringFromEntry(lastEntry);
-    const start = dateStringToDate(startString, nowString, now);
+    const start = dateStringToDate(startString, locale);
     const duration = getDuration(end, start);
     setDurationMinutesOutput(duration, core);
     const durationString = duration.toLocaleTimeString(locale, {
@@ -108,7 +111,7 @@ async function main(github, context, core) {
         updatedIssueBodyLines = addNewEntry(issueBodyLines, LOCALE);
     }
     else if (eventAction === "unlabeled") {
-        updatedIssueBodyLines = await completeLastEntry(issueBodyLines, LOCALE, core, (since, until) => getCommitsBetweenDates(github, context.repo, since, until));
+        updatedIssueBodyLines = await completeLastEntry(issueBodyLines, LOCALE, core, (since, until) => getCommitsBetweenDates(github, context.repo, { since, until }, LOCALE));
     }
     else {
         throw new Error("Unknown value of eventAction: " + eventAction);
