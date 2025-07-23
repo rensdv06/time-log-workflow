@@ -36,10 +36,14 @@ function addNewEntry(issueBodyLines) {
     const newEntry = `| ${startString} |                     |          |         |`;
     return issueBodyLines.toSpliced(lineIndexOfLastEntry + 1, 0, newEntry);
 }
+function removeMilliseconds(date) {
+    date.setMilliseconds(0);
+    return date;
+}
 function dateStringToDate(dateString) {
     const dateWithTimeZoneOffset = new Date(dateString);
     const timestampWithTimeZoneOffset = dateWithTimeZoneOffset.getTime();
-    const now = new Date();
+    const now = removeMilliseconds(new Date());
     const nowString = dateToString(now);
     const nowWithTimeZoneOffset = new Date(nowString);
     const timeZoneOffset = nowWithTimeZoneOffset.getTime() - now.getTime();
@@ -59,10 +63,6 @@ async function getCommitsBetweenDates(github, repo, sinceString, untilString) {
         until: untilIsoString,
     });
     return response.data;
-}
-function removeMilliseconds(date) {
-    date.setMilliseconds(0);
-    return date;
 }
 function getStartStringFromEntry(entry) {
     const startPattern = /(?<=\| )[^\|]+(?= \|)/;
@@ -93,10 +93,10 @@ function stringReplaceWithMultipleValues(string, searchValue, replaceValues) {
 async function completeLastEntry(issueBodyLines, core, getCommits) {
     const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
     const lastEntry = issueBodyLines[lineIndexOfLastEntry];
-    const now = new Date();
+    const now = removeMilliseconds(new Date());
     const nowString = dateToString(now);
     const endString = nowString;
-    const end = removeMilliseconds(new Date(now));
+    const end = now;
     const startString = getStartStringFromEntry(lastEntry);
     const start = dateStringToDate(startString);
     const duration = getDuration(end, start);
