@@ -82,9 +82,9 @@ function setDurationMinutesOutput(duration, core) {
     const durationMinutes = Math.round(durationMilliseconds / 1000 / 60);
     core.setOutput("duration_minutes", durationMinutes);
 }
-function getCommitHashesString(commits) {
-    const commitHashes = commits.map((commit) => commit.sha.slice(0, 7));
-    return commitHashes.join(" ");
+function commitsToHashesString(commits) {
+    const hashes = commits.map((commit) => commit.sha.slice(0, 7));
+    return hashes.join(" ");
 }
 function stringReplaceWithMultipleValues(string, searchValue, replaceValues) {
     let replacedValuesCounter = 0;
@@ -103,7 +103,7 @@ async function completeLastEntry(issueBodyLines, core, getCommits) {
     setDurationMinutesOutput(duration, core);
     const durationString = dateToString(duration, { timeZone: "UTC" }, { timeOnly: true });
     const commits = await getCommits(startString, endString);
-    const commitsString = getCommitHashesString(commits);
+    const commitsString = commitsToHashesString(commits);
     const valuesToUpdatePattern = /(?<=\| .+ \| )[^\|]+(?= \|)/g;
     const updatedValues = [endString, durationString, commitsString];
     issueBodyLines[lineIndexOfLastEntry] = stringReplaceWithMultipleValues(lastEntry, valuesToUpdatePattern, updatedValues);

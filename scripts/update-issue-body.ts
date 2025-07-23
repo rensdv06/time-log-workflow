@@ -116,9 +116,9 @@ function setDurationMinutesOutput(duration: Date, core: Core) {
   core.setOutput("duration_minutes", durationMinutes);
 }
 
-function getCommitHashesString(commits: Commit[]) {
-  const commitHashes = commits.map((commit) => commit.sha.slice(0, 7));
-  return commitHashes.join(" ");
+function commitsToHashesString(commits: Commit[]) {
+  const hashes = commits.map((commit) => commit.sha.slice(0, 7));
+  return hashes.join(" ");
 }
 
 function stringReplaceWithMultipleValues(
@@ -163,7 +163,7 @@ async function completeLastEntry(
   );
 
   const commits = await getCommits(startString, endString);
-  const commitsString = getCommitHashesString(commits);
+  const commitsString = commitsToHashesString(commits);
 
   const valuesToUpdatePattern = /(?<=\| .+ \| )[^\|]+(?= \|)/g;
   const updatedValues = [endString, durationString, commitsString];
