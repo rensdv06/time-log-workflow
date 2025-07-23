@@ -90,6 +90,11 @@ async function getCommitsBetweenDates(
   return response.data;
 }
 
+function removeMilliseconds(date: Date) {
+  date.setMilliseconds(0);
+  return date;
+}
+
 function getStartStringFromEntry(entry: string) {
   const startPattern = /(?<=\| )[^\|]+(?= \|)/;
   const startMatches = entry.match(startPattern);
@@ -144,7 +149,7 @@ async function completeLastEntry(
   const nowString = dateToString(now);
 
   const endString = nowString;
-  const end = now;
+  const end = removeMilliseconds(new Date(now));
 
   const startString = getStartStringFromEntry(lastEntry);
   const start = dateStringToDate(startString);

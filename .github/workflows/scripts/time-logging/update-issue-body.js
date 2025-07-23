@@ -60,6 +60,10 @@ async function getCommitsBetweenDates(github, repo, sinceString, untilString) {
     });
     return response.data;
 }
+function removeMilliseconds(date) {
+    date.setMilliseconds(0);
+    return date;
+}
 function getStartStringFromEntry(entry) {
     const startPattern = /(?<=\| )[^\|]+(?= \|)/;
     const startMatches = entry.match(startPattern);
@@ -92,7 +96,7 @@ async function completeLastEntry(issueBodyLines, core, getCommits) {
     const now = new Date();
     const nowString = dateToString(now);
     const endString = nowString;
-    const end = now;
+    const end = removeMilliseconds(new Date(now));
     const startString = getStartStringFromEntry(lastEntry);
     const start = dateStringToDate(startString);
     const duration = getDuration(end, start);
