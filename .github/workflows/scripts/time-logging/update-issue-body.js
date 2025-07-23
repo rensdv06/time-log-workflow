@@ -19,33 +19,39 @@ function getLineIndexOfLastEntry(issueBodyLines) {
             nextLine === "");
     });
 }
-function dateToLocaleString(date, locale) {
-    return date.toLocaleString(locale, { timeZone: "Europe/Amsterdam" });
+function dateToString(date, options = {}, { timeOnly = false } = {}) {
+    // YYYY-MM-DD HH:MM:SS format
+    // Must be a locale that uses a valid format for the Date constructor
+    const LOCALE = "sv-SE";
+    options = { timeZone: "Europe/Amsterdam", ...options };
+    return !timeOnly
+        ? date.toLocaleString(LOCALE, options)
+        : date.toLocaleTimeString(LOCALE, options);
 }
-function addNewEntry(issueBodyLines, locale) {
+function addNewEntry(issueBodyLines) {
     const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
     const now = new Date();
-    const nowString = dateToLocaleString(now, locale);
+    const nowString = dateToString(now);
     const startString = nowString;
     const newEntry = `| ${startString} |                     |          |         |`;
     return issueBodyLines.toSpliced(lineIndexOfLastEntry + 1, 0, newEntry);
 }
-function dateStringToDate(dateString, locale) {
+function dateStringToDate(dateString) {
     const dateWithTimeZoneOffset = new Date(dateString);
     const timestampWithTimeZoneOffset = dateWithTimeZoneOffset.getTime();
     const now = new Date();
-    const nowString = dateToLocaleString(now, locale);
+    const nowString = dateToString(now);
     const nowWithTimeZoneOffset = new Date(nowString);
     const timeZoneOffset = nowWithTimeZoneOffset.getTime() - now.getTime();
     return new Date(timestampWithTimeZoneOffset - timeZoneOffset);
 }
-function dateStringToIsoString(dateString, locale) {
-    const date = dateStringToDate(dateString, locale);
+function dateStringToIsoString(dateString) {
+    const date = dateStringToDate(dateString);
     return date.toISOString().split(".")[0] + "Z";
 }
-async function getCommitsBetweenDates(github, repo, dateStrings, locale) {
-    const sinceIsoString = dateStringToIsoString(dateStrings.since, locale);
-    const untilIsoString = dateStringToIsoString(dateStrings.until, locale);
+async function getCommitsBetweenDates(github, repo, sinceString, untilString) {
+    const sinceIsoString = dateStringToIsoString(sinceString);
+    const untilIsoString = dateStringToIsoString(untilString);
     const response = await github.rest.repos.listCommits({
         owner: repo.owner,
         repo: repo.repo,
@@ -80,20 +86,18 @@ function stringReplaceWithMultipleValues(string, searchValue, replaceValues) {
     let replacedValuesCounter = 0;
     return string.replace(searchValue, () => replaceValues[replacedValuesCounter++]);
 }
-async function completeLastEntry(issueBodyLines, locale, core, getCommits) {
+async function completeLastEntry(issueBodyLines, core, getCommits) {
     const lineIndexOfLastEntry = getLineIndexOfLastEntry(issueBodyLines);
     const lastEntry = issueBodyLines[lineIndexOfLastEntry];
     const now = new Date();
-    const nowString = dateToLocaleString(now, locale);
+    const nowString = dateToString(now);
     const endString = nowString;
     const end = now;
     const startString = getStartStringFromEntry(lastEntry);
-    const start = dateStringToDate(startString, locale);
+    const start = dateStringToDate(startString);
     const duration = getDuration(end, start);
     setDurationMinutesOutput(duration, core);
-    const durationString = duration.toLocaleTimeString(locale, {
-        timeZone: "UTC",
-    });
+    const durationString = dateToString(duration, { timeZone: "UTC" }, { timeOnly: true });
     const commits = await getCommits(startString, endString);
     const commitsString = getCommitHashesString(commits);
     const valuesToUpdatePattern = /(?<=\| .+ \| )[^\|]+(?= \|)/g;
@@ -102,16 +106,15 @@ async function completeLastEntry(issueBodyLines, locale, core, getCommits) {
     return issueBodyLines;
 }
 async function main(github, context, core) {
+    const eventAction = context.payload.action;
     const issue = context.payload.issue;
     const issueBodyLines = issue.body.split("\n");
-    const LOCALE = "sv-SE"; // YYYY-MM-DD HH:MM:SS format
-    const eventAction = context.payload.action;
     let updatedIssueBodyLines;
     if (eventAction === "labeled") {
-        updatedIssueBodyLines = addNewEntry(issueBodyLines, LOCALE);
+        updatedIssueBodyLines = addNewEntry(issueBodyLines);
     }
     else if (eventAction === "unlabeled") {
-        updatedIssueBodyLines = await completeLastEntry(issueBodyLines, LOCALE, core, (since, until) => getCommitsBetweenDates(github, context.repo, { since, until }, LOCALE));
+        updatedIssueBodyLines = await completeLastEntry(issueBodyLines, core, (since, until) => getCommitsBetweenDates(github, context.repo, since, until));
     }
     else {
         throw new Error("Unknown value of eventAction: " + eventAction);
