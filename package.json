@@ -9,8 +9,6 @@
   },
   "license": "MIT",
   "author": "rensdv06",
-  "type": "commonjs",
-  "main": "dist/script.js",
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc"
