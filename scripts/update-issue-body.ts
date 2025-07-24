@@ -33,7 +33,7 @@ function dateToString(
   options: Intl.DateTimeFormatOptions = {},
   { timeOnly = false } = {}
 ) {
-  // YYYY-MM-DD hh:mm:ss format
+  // YYYY-MM-DD HH:mm:ss format
   // Must be a locale that uses a valid format for the Date constructor
   const LOCALE = "sv-SE";
   options = { timeZone: "Europe/Amsterdam", ...options };
