@@ -1,6 +1,6 @@
-# Test issue 1
+# Example issue
 
-This is the first test issue!
+This is the description of an example issue!
 
 | Other | Table |
 | ----- | ----- |
@@ -10,8 +10,8 @@ This is the first test issue!
 
 | Start               | End                 | Duration | Commits |
 | ------------------- | ------------------- | -------- | ------- |
-| 2025-07-02 12:06:22 | 2025-07-02 13:06:22 | 01:00:00 |         |
-| 2025-07-02 14:06:22 |                     |          |         |
+| 2025-07-23 15:53:00 | 2025-07-23 15:59:30 | 00:06:30 | 800b40a |
+| 2025-07-24 10:44:00 |                     |          |         |
 
 | Other | Table |
 | ----- | ----- |
