@@ -1,7 +1,7 @@
 {
   "name": "time-log-workflow",
   "version": "1.0.0",
-  "description": "A GitHub workflow to automatically log time spent on an issue in its description by toggling a label",
+  "description": "A GitHub actions workflow to automatically log time spent on issues in their descriptions and project items by toggling a label",
   "homepage": "https://github.com/rensdv06/time-log-workflow",
   "repository": {
     "type": "git",
