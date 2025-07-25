@@ -19,7 +19,7 @@ The time log table functionality is the core of this workflow. You can choose to
 ### Prerequisites
 
 - You'll need to have this repository cloned in order to make changes and easily copy files.
-- You'll need another GitHub repository with write access to use this workflow for.
+- You'll need another GitHub repository with write access to use this workflow in.
 - (P) That repository must be linked to a GitHub project that you also have write access to.
 - (P) All issues you want to use this workflow for must be added to that project.
 
