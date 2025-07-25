@@ -16,8 +16,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Update time log in issue
-        id: update_time_log_in_issue
+      - name: Update time log in issue body
+        id: update_time_log_in_issue_body
         uses: actions/github-script@v7
         with:
           script: |
@@ -37,5 +37,5 @@ jobs:
                 timeEstimateFieldId: "${{vars.TIME_ESTIMATE_FIELD_ID}}",
                 timeRemainingFieldId: "${{vars.TIME_REMAINING_FIELD_ID}}",
               },
-              ${{steps.update_time_log_in_issue.outputs.duration_minutes}}
+              ${{steps.update_time_log_in_issue_body.outputs.duration_minutes}}
             );
