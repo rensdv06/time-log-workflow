@@ -53,7 +53,7 @@ The time log table functionality is the core of this workflow. You can choose to
 3. Start working on the issue and maybe make a few commits.
 4. Remove the label from the issue when you're done.
 5. The workflow will be triggered again and will update the last row of the time log table with your end time, the duration, and links to the commits you made in the meantime.
-6. (P) The duration (in minutes) will be subtracted from the value of the time remaining field of the project item. If that field has no value, the value of the time estimate field will be used instead. If that also has no value, nothing will be changed.
+6. (P) The duration in minutes will be subtracted from the value of the time remaining field of the project item. If that field has no value, the value of the time estimate field will be used instead. If that also has no value, nothing will be changed.
 
 ## Development
 
