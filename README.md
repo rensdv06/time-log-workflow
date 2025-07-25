@@ -5,6 +5,9 @@ A GitHub actions workflow to automatically log time spent on issues in their des
 > [!TIP]
 > Take a look ahead at [usage](#usage) to get an idea of how it works.
 
+> [!TIP]
+> Check out the [issue description example](issue-descriptions/issue-description-example.md) to get an idea of what an issue description might look like when using this workflow. Just keep in mind that the commit hash doesn't have a link here — GitHub only adds that once it's actually in an issue description.
+
 ## Purpose
 
 The purpose of this workflow is to gain insight into the time spent and the time remaining on issues. This helps you to identify delays or leads in a timely manner, making it easier to make better decisions on how to handle them.
