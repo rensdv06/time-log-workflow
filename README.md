@@ -28,12 +28,15 @@ The time log table functionality is the core of this workflow. You can choose to
 
 ### Setup
 
+> [!NOTE]
+> These steps use the default names for everything. In case you'd like to change one, see [configuration](#configuration).
+
 1. Copy the contents of the [workflows folder](.github/workflows/) to `.github/workflows/` in your repository.
 2. Choose an existing label or create a new one to trigger the workflow. It must be named "in progress".
 3. Add the [time log section](issue-descriptions/time-log-section-template.md) to the descriptions of the issues where you'd like to use this workflow.
 4. (T) Remove the line `environment: time-logging` from the [workflow file](.github/workflows/time-logging.yml).
 5. (T) Remove the step "Update time remaining in project item" from the [workflow file](.github/workflows/time-logging.yml).
-6. (T) Optionally remove [update-time-remaining.js](.github/workflows/scripts/time-logging/update-time-remaining.js).
+6. (T) Optionally remove [`update-time-remaining.js`](.github/workflows/scripts/time-logging/update-time-remaining.js).
 7. (P) Create an environment in your repository to store secrets and variables. Name it "time-logging".
 8. (P) Generate a personal access token with the necessary scopes and/or permissions to read issues, project fields, and project items, and to write to project items. For a classic token, the "repo" and "project" scopes are sufficient.
 9. (P) Add the personal access token as a secret in the environment. Name it "PERSONAL_ACCESS_TOKEN".
@@ -57,6 +60,10 @@ The time log table functionality is the core of this workflow. You can choose to
 4. Remove the label from the issue when you're done.
 5. The workflow will be triggered again and will update the last row of the time log table with your end time, the duration, and links to the commits you made in the meantime.
 6. (P) The duration in minutes will be subtracted from the value of the time remaining field of the project item. If that field has no value, the value of the time estimate field will be used instead. If that also has no value, nothing will be changed.
+
+## Configuration
+
+Changes to the workflow — like modifying the trigger, adding new steps, or simply renaming something — can be made by directly editing the [workflow file](.github/workflows/time-logging.yml). There’s no separate config file like a `.env` file. Any variables and secrets are stored in a GitHub environment, as explained in [setup](#setup).
 
 ## Development
 
