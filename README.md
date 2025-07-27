@@ -34,20 +34,21 @@ The time log table functionality is the core of this workflow. You can choose to
 1. Copy the contents of the [workflows folder](.github/workflows/) to `.github/workflows/` in your repository.
 2. Choose an existing label or create a new one to trigger the workflow. It must be named "in progress".
 3. Add the [time log section](issue-descriptions/time-log-section-template.md) to the descriptions of the issues where you'd like to use this workflow.
-4. (T) Remove the line `environment: time-logging` from the [workflow file](.github/workflows/time-logging.yml).
-5. (T) Remove the step "Update time remaining in project item" from the [workflow file](.github/workflows/time-logging.yml).
-6. (T) Optionally remove [`update-time-remaining.js`](.github/workflows/scripts/time-logging/update-time-remaining.js).
-7. (P) Create an environment in your repository to store secrets and variables. Name it "time-logging".
-8. (P) Generate a personal access token with the necessary scopes and/or permissions to read issues, project fields, and project items, and to write to project items. For a classic token, the "repo" and "project" scopes are sufficient.
-9. (P) Add the personal access token as a secret in the environment. Name it "PERSONAL_ACCESS_TOKEN".
-10. (P) Create custom number fields in your project for a time estimate and the time remaining (in minutes).
-11. (P) Get the (node) IDs of these custom number fields. You can use the [shell script](scripts/get-project-fields.sh) for that:
+4. Set the time zone in which dates and times should be noted and interpreted. This can be done in the `options` object of `dateToString(...)` in [`update-issue-body.js`](.github/workflows/scripts/time-logging/update-issue-body.js). Must be an IANA time zone name. The default is `Europe/Amsterdam`. See [the reference](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#timezone) or [this list of time zones](https://data.iana.org/time-zones/tzdb-2021a/zone1970.tab) for more information.
+5. (T) Remove the line `environment: time-logging` from the [workflow file](.github/workflows/time-logging.yml).
+6. (T) Remove the step "Update time remaining in project item" from the [workflow file](.github/workflows/time-logging.yml).
+7. (T) Optionally remove [`update-time-remaining.js`](.github/workflows/scripts/time-logging/update-time-remaining.js).
+8. (P) Create an environment in your repository to store secrets and variables. Name it "time-logging".
+9. (P) Generate a personal access token with the necessary scopes and/or permissions to read issues, project fields, and project items, and to write to project items. For a classic token, the "repo" and "project" scopes are sufficient.
+10. (P) Add the personal access token as a secret in the environment. Name it "PERSONAL_ACCESS_TOKEN".
+11. (P) Create custom number fields in your project for a time estimate and the time remaining (in minutes).
+12. (P) Get the (node) IDs of these custom number fields. You can use the [shell script](scripts/get-project-fields.sh) for that:
     1. Find your project number. You can easily find it in the project URL. In the URL <https://github.com/users/rensdv06/projects/1>, for example, the project number is 1.
     2. Run the [script](scripts/get-project-fields.sh). If you're on Windows, you'll have to use a Unix-like shell such as Git Bash.
     3. Enter your personal access token, username, and project number.
     4. The script will return details for the first 20 project fields. Keep note of the "id" values for the time estimate and time remaining fields.
-12. (P) Add these field IDs as variables in the environment. Name them "TIME_ESTIMATE_FIELD_ID" and "TIME_REMAINING_FIELD_ID".
-13. Commit and push the added files to bring the workflow to GitHub.
+13. (P) Add these field IDs as variables in the environment. Name them "TIME_ESTIMATE_FIELD_ID" and "TIME_REMAINING_FIELD_ID".
+14. Commit and push the added files to bring the workflow to GitHub.
 
 > [!TIP]
 > Copy the [time log section template](issue-descriptions/time-log-section-template.md) to an issue template on GitHub to have the option to automatically include the time log section in new issues.
@@ -63,7 +64,9 @@ The time log table functionality is the core of this workflow. You can choose to
 
 ## Configuration
 
-Changes to the workflow — like modifying the trigger, adding new steps, or simply renaming something — can be made by directly editing the [workflow file](.github/workflows/time-logging.yml). There’s no separate config file like a `.env` file. Any variables and secrets are stored in a GitHub environment, as explained in [setup](#setup).
+Changes to the workflow — like modifying the trigger, adding new steps, or simply renaming something — can be made by directly editing the [workflow file](.github/workflows/time-logging.yml). The only exception to this is the time zone (see [setup](#setup)).
+
+There’s no separate config file like a `.env`. Any variables and secrets are stored in a GitHub environment, as explained in [setup](#setup).
 
 ## Development
 
