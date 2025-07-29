@@ -91,7 +91,7 @@ async function getCommitsBetweenDates(github, { since, until, ...parameters }) {
         since: sinceIsoString,
         until: untilIsoString,
     });
-    return response.data;
+    return response.data.reverse(); // oldest first
 }
 function commitsToHashesString(commits) {
     const hashes = commits.map((commit) => commit.sha.slice(0, 7));

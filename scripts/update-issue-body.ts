@@ -142,7 +142,7 @@ async function getCommitsBetweenDates(
     since: sinceIsoString,
     until: untilIsoString,
   });
-  return response.data;
+  return response.data.reverse(); // oldest first
 }
 
 function commitsToHashesString(commits: Commit[]) {
