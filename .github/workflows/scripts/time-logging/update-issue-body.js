@@ -71,13 +71,11 @@ function dateStringToIsoString(dateString) {
     const date = dateStringToDate(dateString);
     return date.toISOString().split(".")[0] + "Z";
 }
-async function getCommitsFromSenderBetweenDates(github, context, sinceString, untilString) {
-    const sinceIsoString = dateStringToIsoString(sinceString);
-    const untilIsoString = dateStringToIsoString(untilString);
+async function getCommitsBetweenDates(github, { since, until, ...parameters }) {
+    const sinceIsoString = dateStringToIsoString(since);
+    const untilIsoString = dateStringToIsoString(until);
     const response = await github.rest.repos.listCommits({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        author: context.payload.sender.login,
+        ...parameters,
         since: sinceIsoString,
         until: untilIsoString,
     });
@@ -114,20 +112,25 @@ async function main(github, context, core) {
     const eventAction = context.payload.action;
     const issue = context.payload.issue;
     const issueBodyLines = issue.body.split("\n");
+    const repo = context.repo;
     let updatedIssueBodyLines;
     if (eventAction === "labeled") {
         updatedIssueBodyLines = addNewEntry(issueBodyLines);
     }
     else if (eventAction === "unlabeled") {
-        updatedIssueBodyLines = await completeLastEntry(issueBodyLines, core, (since, until) => getCommitsFromSenderBetweenDates(github, context, since, until));
+        updatedIssueBodyLines = await completeLastEntry(issueBodyLines, core, (since, until) => getCommitsBetweenDates(github, {
+            ...repo,
+            author: context.payload.sender.login,
+            since,
+            until,
+        }));
     }
     else {
         throw new Error("Unknown value of eventAction: " + eventAction);
     }
     const updatedIssueBody = updatedIssueBodyLines.join("\n");
     github.rest.issues.update({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
+        ...repo,
         issue_number: issue.number,
         body: updatedIssueBody,
     });

@@ -1,9 +1,12 @@
 import { GitHub } from "@actions/github/lib/utils";
 import { Context } from "@actions/github/lib/context";
 import * as core from "@actions/core";
+import { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods";
 
 type GitHub = InstanceType<typeof GitHub>;
 type Core = typeof core;
+
+type PartiallyRequired<T, K extends keyof T> = T & Required<Pick<T, K>>;
 
 function getLineIsFromTable(line: string) {
   return /\|.+\|/.test(line);
@@ -98,19 +101,22 @@ function dateStringToIsoString(dateString: string) {
   return date.toISOString().split(".")[0] + "Z";
 }
 
-async function getCommitsFromSenderBetweenDates(
+async function getCommitsBetweenDates(
   github: GitHub,
-  context: Context,
-  sinceString: string,
-  untilString: string
+  {
+    since,
+    until,
+    ...parameters
+  }: PartiallyRequired<
+    RestEndpointMethodTypes["repos"]["listCommits"]["parameters"],
+    "since" | "until"
+  >
 ) {
-  const sinceIsoString = dateStringToIsoString(sinceString);
-  const untilIsoString = dateStringToIsoString(untilString);
+  const sinceIsoString = dateStringToIsoString(since);
+  const untilIsoString = dateStringToIsoString(until);
 
   const response = await github.rest.repos.listCommits({
-    owner: context.repo.owner,
-    repo: context.repo.repo,
-    author: context.payload.sender!.login,
+    ...parameters,
     since: sinceIsoString,
     until: untilIsoString,
   });
@@ -181,6 +187,7 @@ async function main(github: GitHub, context: Context, core: Core) {
   const eventAction = context.payload.action;
   const issue = context.payload.issue!;
   const issueBodyLines = issue.body!.split("\n");
+  const repo = context.repo;
 
   let updatedIssueBodyLines: string[];
   if (eventAction === "labeled") {
@@ -190,7 +197,12 @@ async function main(github: GitHub, context: Context, core: Core) {
       issueBodyLines,
       core,
       (since, until) =>
-        getCommitsFromSenderBetweenDates(github, context, since, until)
+        getCommitsBetweenDates(github, {
+          ...repo,
+          author: context.payload.sender!.login,
+          since,
+          until,
+        })
     );
   } else {
     throw new Error("Unknown value of eventAction: " + eventAction);
@@ -198,8 +210,7 @@ async function main(github: GitHub, context: Context, core: Core) {
 
   const updatedIssueBody = updatedIssueBodyLines.join("\n");
   github.rest.issues.update({
-    owner: context.repo.owner,
-    repo: context.repo.repo,
+    ...repo,
     issue_number: issue.number,
     body: updatedIssueBody,
   });
