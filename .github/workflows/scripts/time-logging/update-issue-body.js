@@ -67,6 +67,18 @@ function setDurationMinutesOutput(duration, core) {
     const durationMinutes = Math.round(durationMilliseconds / 1000 / 60);
     core.setOutput("duration_minutes", durationMinutes);
 }
+async function getBranches(github, repo) {
+    const response = await github.rest.repos.listBranches({ ...repo });
+    return response.data.map((branch) => branch.name);
+}
+async function getIssueBranch(github, repo, issueNumber) {
+    const branches = await getBranches(github, repo);
+    const issueBranch = branches.find((branch) => branch.startsWith(issueNumber + "-"));
+    if (issueBranch === undefined) {
+        console.warn(`No issue branch found for issue with number ${issueNumber} in branches ${JSON.stringify(branches)}`);
+    }
+    return issueBranch;
+}
 function dateStringToIsoString(dateString) {
     const date = dateStringToDate(dateString);
     return date.toISOString().split(".")[0] + "Z";
@@ -118,12 +130,18 @@ async function main(github, context, core) {
         updatedIssueBodyLines = addNewEntry(issueBodyLines);
     }
     else if (eventAction === "unlabeled") {
-        updatedIssueBodyLines = await completeLastEntry(issueBodyLines, core, (since, until) => getCommitsBetweenDates(github, {
-            ...repo,
-            author: context.payload.sender.login,
-            since,
-            until,
-        }));
+        updatedIssueBodyLines = await completeLastEntry(issueBodyLines, core, async (since, until) => {
+            const issueBranch = await getIssueBranch(github, repo, issue.number);
+            return issueBranch !== undefined
+                ? getCommitsBetweenDates(github, {
+                    ...repo,
+                    author: context.payload.sender.login,
+                    sha: issueBranch,
+                    since,
+                    until,
+                })
+                : [];
+        });
     }
     else {
         throw new Error("Unknown value of eventAction: " + eventAction);

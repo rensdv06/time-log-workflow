@@ -5,6 +5,7 @@ import { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods";
 
 type GitHub = InstanceType<typeof GitHub>;
 type Core = typeof core;
+type Repo = Context["repo"];
 
 type PartiallyRequired<T, K extends keyof T> = T & Required<Pick<T, K>>;
 
@@ -94,6 +95,27 @@ function setDurationMinutesOutput(duration: Date, core: Core) {
   const durationMilliseconds = duration.getTime();
   const durationMinutes = Math.round(durationMilliseconds / 1000 / 60);
   core.setOutput("duration_minutes", durationMinutes);
+}
+
+async function getBranches(github: GitHub, repo: Repo) {
+  const response = await github.rest.repos.listBranches({ ...repo });
+  return response.data.map((branch) => branch.name);
+}
+
+async function getIssueBranch(github: GitHub, repo: Repo, issueNumber: number) {
+  const branches = await getBranches(github, repo);
+  const issueBranch = branches.find((branch) =>
+    branch.startsWith(issueNumber + "-")
+  );
+
+  if (issueBranch === undefined) {
+    console.warn(
+      `No issue branch found for issue with number ${issueNumber} in branches ${JSON.stringify(
+        branches
+      )}`
+    );
+  }
+  return issueBranch;
 }
 
 function dateStringToIsoString(dateString: string) {
@@ -196,13 +218,18 @@ async function main(github: GitHub, context: Context, core: Core) {
     updatedIssueBodyLines = await completeLastEntry(
       issueBodyLines,
       core,
-      (since, until) =>
-        getCommitsBetweenDates(github, {
-          ...repo,
-          author: context.payload.sender!.login,
-          since,
-          until,
-        })
+      async (since, until) => {
+        const issueBranch = await getIssueBranch(github, repo, issue.number);
+        return issueBranch !== undefined
+          ? getCommitsBetweenDates(github, {
+              ...repo,
+              author: context.payload.sender!.login,
+              sha: issueBranch,
+              since,
+              until,
+            })
+          : [];
+      }
     );
   } else {
     throw new Error("Unknown value of eventAction: " + eventAction);
