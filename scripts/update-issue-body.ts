@@ -98,9 +98,9 @@ function dateStringToIsoString(dateString: string) {
   return date.toISOString().split(".")[0] + "Z";
 }
 
-async function getCommitsBetweenDates(
+async function getCommitsFromSenderBetweenDates(
   github: GitHub,
-  repo: Context["repo"],
+  context: Context,
   sinceString: string,
   untilString: string
 ) {
@@ -108,8 +108,9 @@ async function getCommitsBetweenDates(
   const untilIsoString = dateStringToIsoString(untilString);
 
   const response = await github.rest.repos.listCommits({
-    owner: repo.owner,
-    repo: repo.repo,
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    author: context.payload.sender!.login,
     since: sinceIsoString,
     until: untilIsoString,
   });
@@ -189,7 +190,7 @@ async function main(github: GitHub, context: Context, core: Core) {
       issueBodyLines,
       core,
       (since, until) =>
-        getCommitsBetweenDates(github, context.repo, since, until)
+        getCommitsFromSenderBetweenDates(github, context, since, until)
     );
   } else {
     throw new Error("Unknown value of eventAction: " + eventAction);

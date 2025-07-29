@@ -71,12 +71,13 @@ function dateStringToIsoString(dateString) {
     const date = dateStringToDate(dateString);
     return date.toISOString().split(".")[0] + "Z";
 }
-async function getCommitsBetweenDates(github, repo, sinceString, untilString) {
+async function getCommitsFromSenderBetweenDates(github, context, sinceString, untilString) {
     const sinceIsoString = dateStringToIsoString(sinceString);
     const untilIsoString = dateStringToIsoString(untilString);
     const response = await github.rest.repos.listCommits({
-        owner: repo.owner,
-        repo: repo.repo,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        author: context.payload.sender.login,
         since: sinceIsoString,
         until: untilIsoString,
     });
@@ -118,7 +119,7 @@ async function main(github, context, core) {
         updatedIssueBodyLines = addNewEntry(issueBodyLines);
     }
     else if (eventAction === "unlabeled") {
-        updatedIssueBodyLines = await completeLastEntry(issueBodyLines, core, (since, until) => getCommitsBetweenDates(github, context.repo, since, until));
+        updatedIssueBodyLines = await completeLastEntry(issueBodyLines, core, (since, until) => getCommitsFromSenderBetweenDates(github, context, since, until));
     }
     else {
         throw new Error("Unknown value of eventAction: " + eventAction);
