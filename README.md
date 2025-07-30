@@ -61,7 +61,10 @@ The time log table functionality is the core of this workflow. You can choose to
 4. Publish the issue branch to GitHub.
 5. Start working on the issue and maybe make a few commits.
 6. Remove the label from the issue when you're done.
-7. The workflow will be triggered again and will update the last row of the time log table with your end time, the duration, and links to the commits you made on the issue branch in the meantime.
+7. The workflow will be triggered again and will update the last row of the time log table with:
+   - Your end time
+   - The duration
+   - Links to the commits you made on the issue branch during that time, from old to new.
 8. (P) The duration in minutes will be subtracted from the value of the time remaining field of the project item. If that field has no value, the value of the time estimate field will be used instead. If that also has no value, nothing will be changed.
 
 ## Configuration
