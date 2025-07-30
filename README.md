@@ -19,6 +19,9 @@ The time log table functionality is the core of this workflow. You can choose to
 - ❌ Don’t want that, follow the additional points and steps marked with "(T)".
 - ✅ Do want that, follow the additional points and steps marked with "(P)".
 
+> [!NOTE]
+> The points and steps below use the default names for everything. In case you'd like to change one, see [configuration](#configuration).
+
 ### Prerequisites
 
 - You'll need to have this repository cloned in order to make changes and easily copy files.
@@ -27,9 +30,6 @@ The time log table functionality is the core of this workflow. You can choose to
 - (P) All issues you want to use this workflow for must be added to that project.
 
 ### Setup
-
-> [!NOTE]
-> These steps use the default names for everything. In case you'd like to change one, see [configuration](#configuration).
 
 1. Copy the contents of the [workflows folder](.github/workflows/) to `.github/workflows/` in your repository.
 2. Choose an existing label or create a new one to trigger the workflow. It must be named "in progress".
@@ -57,10 +57,12 @@ The time log table functionality is the core of this workflow. You can choose to
 
 1. Add the "in progress" label to the issue you're going to work on.
 2. The workflow will be triggered and will add a new row with your start time to the time log table in the issue description.
-3. Start working on the issue and maybe make a few commits.
-4. Remove the label from the issue when you're done.
-5. The workflow will be triggered again and will update the last row of the time log table with your end time, the duration, and links to the commits you made in the meantime.
-6. (P) The duration in minutes will be subtracted from the value of the time remaining field of the project item. If that field has no value, the value of the time estimate field will be used instead. If that also has no value, nothing will be changed.
+3. Create a branch and checkout to it to work on the issue. The branch name must start with the issue number, followed by a hyphen (-).
+4. Publish the issue branch to GitHub.
+5. Start working on the issue and maybe make a few commits.
+6. Remove the label from the issue when you're done.
+7. The workflow will be triggered again and will update the last row of the time log table with your end time, the duration, and links to the commits you made on the issue branch in the meantime.
+8. (P) The duration in minutes will be subtracted from the value of the time remaining field of the project item. If that field has no value, the value of the time estimate field will be used instead. If that also has no value, nothing will be changed.
 
 ## Configuration
 
