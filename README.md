@@ -81,7 +81,7 @@ First, run `npm install` to install the necessary dependencies.
 
 When you've made changes to a TS script, run `npm run build` to compile all TS scripts to JS scripts in the [workflow scripts folder](.github/workflows/scripts/time-logging/). Alternatively, run `npm run dev` to automatically compile when a TS script changes.
 
-If you'd like to commit your changes, you should commit both the TS and the JS scripts. This is because the workflow doesn't compile the TS scripts from source — it directly uses the JS scripts.
+If you'd like to commit your changes, you should commit both the TS and the JS scripts. This is because the workflow doesn't compile the TS scripts from source: it directly uses the JS scripts.
 
 ## Design choices
 
