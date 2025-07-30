@@ -66,7 +66,12 @@ The time log table functionality is the core of this workflow. You can choose to
 
 ## Configuration
 
-Changes to the workflow — like modifying the trigger, adding new steps, or simply renaming something — can be made by directly editing the [workflow file](.github/workflows/time-logging.yml). The only exception to this is the time zone (see [setup](#setup)).
+Simple changes to the workflow, like renaming the trigger label or the environment name, can be made by directly editing the [workflow file](.github/workflows/time-logging.yml).
+
+For more complex changes, like changing the trigger or adding a new step, you have 2 options:
+
+- Either change one of the JS scripts in the [workflow scripts folder](.github/workflows/scripts/time-logging/) directly;
+- Or change the TypeScript equivalent in the [scripts folder](scripts). See [development](#development) for more information on how to do this.
 
 There’s no separate config file like a `.env`. Any variables and secrets are stored in a GitHub environment, as explained in [setup](#setup).
 
@@ -76,7 +81,7 @@ First, run `npm install` to install the necessary dependencies.
 
 When you've made changes to a TS script, run `npm run build` to compile all TS scripts to JS scripts in the [workflow scripts folder](.github/workflows/scripts/time-logging/). Alternatively, run `npm run dev` to automatically compile when a TS script changes.
 
-When you're ready to commit your changes, you should commit both the TS and the JS scripts. This is because the workflow doesn't compile the TS scripts from source — it directly uses the JS scripts.
+If you'd like to commit your changes, you should commit both the TS and the JS scripts. This is because the workflow doesn't compile the TS scripts from source — it directly uses the JS scripts.
 
 ## Design choices
 
