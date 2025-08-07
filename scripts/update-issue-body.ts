@@ -27,7 +27,7 @@ function getLineIndexOfLastEntry(issueBodyLines: string[]) {
     return (
       getLineIsFromTable(previousLine) &&
       getLineIsFromTable(line) &&
-      nextLine === ""
+      (nextLine === "" || nextLine === undefined)
     );
   });
 }

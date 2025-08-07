@@ -16,7 +16,7 @@ function getLineIndexOfLastEntry(issueBodyLines) {
         const nextLine = issueBodyLines[lineIndex + 1];
         return (getLineIsFromTable(previousLine) &&
             getLineIsFromTable(line) &&
-            nextLine === "");
+            (nextLine === "" || nextLine === undefined));
     });
 }
 function dateToString(date, options = {}, { timeOnly = false } = {}) {
